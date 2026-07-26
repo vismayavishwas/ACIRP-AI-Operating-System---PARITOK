@@ -4,6 +4,7 @@
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React%20%7C%20Vite-61DAFB?style=flat&logo=react&logoColor=black)](https://reactjs.org/)
 [![Google Gemini](https://img.shields.io/badge/AI%20Core-Gemini%202.5%20Flash-4285F4?style=flat&logo=google-gemini&logoColor=white)](https://ai.google.dev/)
+[![Firebase Hosting](https://img.shields.io/badge/Hosting-Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)](https://acirp-unstop.web.app)
 
 ---
 
@@ -51,6 +52,7 @@ graph TD
 
 * **Backend:** FastAPI (Python), Google GenAI SDK (Gemini 2.5 Flash), FPDF (PDF compiler)
 * **Frontend:** React, Vite, Framer Motion (Transitions), TailwindCSS, Lucide React
+* **Deployment:** Firebase Hosting (Frontend), Render (Backend CI/CD)
 
 ---
 
@@ -63,7 +65,7 @@ graph TD
    ```
 2. Install Python dependencies:
    ```bash
-   pip install fastapi uvicorn google-genai pydantic fpdf2
+   pip install -r requirements.txt
    ```
 3. Set your Gemini API key:
    * **Windows (PowerShell):** `$env:GEMINI_API_KEY="your-key-here"`
@@ -87,3 +89,13 @@ graph TD
    npm run dev
    ```
 4. Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+## 🧪 Running Automated Tests
+
+Run backend unit and integration test suites:
+```bash
+cd backend
+pytest tests -v --cov=.
+```

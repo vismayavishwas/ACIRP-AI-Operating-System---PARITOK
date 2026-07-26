@@ -30,6 +30,9 @@ backend/static/letters/
 
 # Testing and coverage
 .pytest_cache/
+.coverage
+*.coverage
+coverage.xml
 backend/.coverage
 backend/coverage.xml
 htmlcov/

@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, master, comp-unstop ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main, master, comp-unstop ]
+    branches: [ main, master ]
 
 jobs:
   backend-tests:
@@ -84,7 +84,7 @@ jobs:
   frontend-deploy:
     needs: [frontend-build]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/comp-unstop' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     steps:
       - uses: actions/checkout@v4
 

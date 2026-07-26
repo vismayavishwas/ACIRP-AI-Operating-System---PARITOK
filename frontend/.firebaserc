@@ -1,7 +1,6 @@
 {
   "projects": {
-    "default": "acirp-4d440",
-    "unstop": "acirp-unstop"
+    "default": "acirp-unstop"
   },
   "targets": {},
   "etags": {}

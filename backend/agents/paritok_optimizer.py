@@ -93,8 +93,8 @@ class ParitokContextOptimizer:
         self.model_name = model_name
         self.token_cost = token_cost
 
-
     async def optimize_context(
+
         self,
         raw_prompt: str,
         system_rules: str = "",

@@ -63,8 +63,11 @@ class GlobalParitokSession:
         })
 
     def get_summary(self) -> Dict[str, Any]:
-        avg_savings = round((self.total_tokens_saved / max(1, self.total_original_tokens))
-                            * 100.0, 1) if self.total_original_tokens > 0 else 0.0
+        if self.total_original_tokens > 0:
+            avg_savings = round((self.total_tokens_saved / self.total_original_tokens) * 100.0, 1)
+        else:
+            avg_savings = 0.0
+
         return {
             "total_original_tokens": self.total_original_tokens,
             "total_optimized_tokens": self.total_optimized_tokens,

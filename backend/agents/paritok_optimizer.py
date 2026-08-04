@@ -1,3 +1,4 @@
+import os
 import re
 import math
 import logging
@@ -26,6 +27,7 @@ logger = logging.getLogger("acirp.paritok_optimizer")
 
 def estimate_tokens(text: str) -> int:
     """
+
     Accurately estimates token count for text context.
     Standard English text averages ~4 characters per token or ~0.75 words per token.
     """
@@ -108,15 +110,15 @@ class ParitokContextOptimizer:
         model_name: str = PARITOK_MODEL,
         token_cost: float = TOKEN_COST_PER_1K_TOKENS
     ):
-        self.api_key = api_key or "pk_live_MHxyQjvpksZ39-KjUtyA9GZfSEWHsWZb"
-        self.base_url = base_url.rstrip("/")
-        self.model_name = model_name
+        self.api_key = api_key or os.getenv("PARITOK_API_KEY", "pk_live_MHxyQjvpksZ39-KjUtyA9GZfSEWHsWZb")
+        self.base_url = (base_url or os.getenv("PARITOK_BASE_URL", "https://www.paritok.com/api")).rstrip("/")
+        self.model_name = model_name or os.getenv("PARITOK_MODEL", "paritok-4b-v1")
         self.token_cost = token_cost
 
     async def optimize_context(
-
         self,
         raw_prompt: str,
+
         system_rules: str = "",
         retrieved_docs: Optional[List[Dict[str, Any]]] = None,
         conversation_history: Optional[List[Dict[str, Any]]] = None,

@@ -554,17 +554,25 @@ class OptimizeRequest(FastAPIModel):
 async def get_paritok_dashboard():
     """
     Returns live cumulative Paritok token metrics, savings percentage, cost saved,
-    request history log, and active optimizer source.
+    and active optimizer source for the running session.
     """
     summary = paritok_session.get_summary()
     optimizer = ParitokContextOptimizer()
     source_status = "PARITOK_HOSTED_API" if optimizer.api_key and optimizer.api_key != "dummy_key_for_offline_mock" else "LOCAL_FALLBACK_OPTIMIZER"
-    summary["active_optimizer_source"] = source_status
-    return summary
+    return {
+        "active_optimizer_source": source_status,
+        "summary": summary,
+        "total_requests": summary["total_requests"],
+        "total_tokens_saved": summary["total_tokens_saved"],
+        "total_cost_saved_usd": summary["total_cost_saved_usd"],
+        "total_original_tokens": summary["total_original_tokens"],
+        "total_optimized_tokens": summary["total_optimized_tokens"]
+    }
 
 
 @app.post("/api/paritok/optimize")
 async def optimize_custom_prompt(req: OptimizeRequest):
+
     """
     Dedicated endpoint to test Paritok context optimization on any custom text or RAG prompt.
     Returns before vs after prompt, token counts, savings %, efficiency score, and pruned chunk reasons.
@@ -636,22 +644,8 @@ async def get_incident_paritok_metrics(incident_id: str):
     }
 
 
-@app.get("/api/paritok/dashboard")
-async def get_paritok_dashboard_metrics():
-    """
-    Returns real-time Paritok hosted GPU server metrics and session summary.
-    """
-    from agents.paritok_optimizer import paritok_session, PARITOK_API_KEY, PARITOK_BASE_URL
-    summary = paritok_session.get_summary()
-    return {
-        "active_optimizer_source": "PARITOK_HOSTED_API" if PARITOK_API_KEY else "LOCAL_FALLBACK_OPTIMIZER",
-        "paritok_api_key_configured": bool(PARITOK_API_KEY),
-        "paritok_gpu_server_base_url": PARITOK_BASE_URL or "https://www.paritok.com/api",
-        "summary": summary
-    }
-
-
 # ---------------------------------------------------------
+
 # STATIC FILE SERVING FOR UPLOADED IMAGES
 # ---------------------------------------------------------
 app.mount("/static", StaticFiles(directory=UPLOAD_DIR), name="static")

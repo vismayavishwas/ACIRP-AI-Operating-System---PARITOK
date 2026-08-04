@@ -8,4 +8,5 @@ exclude =
     dist,
     .pytest_cache,
     frontend/node_modules
-ignore = E501, W503
+ignore = E501, W503, E402
+

@@ -1,16 +1,18 @@
-from agents.perception import PerceptionAgent
-from models import Incident
 import os
 import sys
 from unittest.mock import MagicMock, patch
 import pytest
 
-# Ensure the parent directory is on sys.path
+# Ensure the backend directory is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from agents.perception import PerceptionAgent
+from models import Incident
 
 
 @pytest.mark.anyio
 async def test_perception_analysis_success():
+
     agent = PerceptionAgent(api_key="test-key")
 
     mock_response = MagicMock()

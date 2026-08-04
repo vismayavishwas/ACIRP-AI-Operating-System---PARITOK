@@ -1,15 +1,17 @@
-from models import Incident, TimelineEvent
-from main import app, db, perception_agent, verification_agent
-from fastapi.testclient import TestClient
 import os
 import sys
 import tempfile
 import pytest
 from unittest.mock import patch, mock_open, AsyncMock
+
+# Ensure the backend directory is on sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from models import Incident, TimelineEvent
+from main import app, db, perception_agent, verification_agent
+from fastapi.testclient import TestClient
 from config import DEFAULT_ROUTING
 
-# Ensure parent directory is on sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Create a temp file path for testing JSON database
 temp_db_fd, temp_db_path = tempfile.mkstemp(suffix="_integration_test_db.json")

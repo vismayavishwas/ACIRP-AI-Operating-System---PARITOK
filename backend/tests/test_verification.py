@@ -1,16 +1,18 @@
-from agents.verification import VerificationAgent
-from models import Incident, Strategy
 import os
 import sys
 from unittest.mock import MagicMock, patch
 import pytest
 
-# Ensure the parent directory is on sys.path
+# Ensure the backend directory is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from agents.verification import VerificationAgent
+from models import Incident, Strategy
 
 
 @pytest.mark.anyio
 async def test_verification_success():
+
     agent = VerificationAgent(api_key="test-key")
 
     mock_response = MagicMock()

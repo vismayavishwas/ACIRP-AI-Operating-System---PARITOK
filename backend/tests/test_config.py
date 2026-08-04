@@ -1,13 +1,15 @@
-import config
 import os
-import importlib
 import sys
+import importlib
 
-# Ensure the parent directory is on sys.path
+# Ensure the backend directory is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import config
 
 
 def test_config_defaults():
+
     # Test settings are loaded with correct defaults
     settings = config.Settings()
     assert settings.photo_confidence_threshold == 0.70

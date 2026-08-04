@@ -1,16 +1,16 @@
-from models import Incident
-from main import app, db, perception_agent, verification_agent
-
 import os
 import sys
 import tempfile
 import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import patch, mock_open
 
-
-# Ensure the parent directory is on sys.path
+# Ensure the backend directory is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from models import Incident
+from main import app, db, perception_agent, verification_agent
+from fastapi.testclient import TestClient
+
 
 # Create a temp file path for the test database before importing main/db_mock
 temp_db_fd, temp_db_path = tempfile.mkstemp(suffix="_test_db.json")

@@ -1,17 +1,18 @@
-from agents.planner import PlanningAgent
-from models import Incident, Strategy
-
 import os
 import sys
 from unittest.mock import MagicMock, patch
 import pytest
 
-# Ensure the parent directory is on sys.path
+# Ensure the backend directory is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from agents.planner import PlanningAgent
+from models import Incident, Strategy
 
 
 @pytest.mark.anyio
 async def test_planner_planned_to_submitted_default():
+
     mock_db = MagicMock()
     mock_db.find_nearby_resolved.return_value = []
 

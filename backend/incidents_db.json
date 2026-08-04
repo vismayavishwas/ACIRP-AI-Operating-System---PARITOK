@@ -2022,5 +2022,26 @@
         },
         "created_at": "2026-08-04T12:02:21.766425",
         "updated_at": "2026-08-04T12:02:57.262063"
+    },
+    "test_inc": {
+        "id": "test_inc",
+        "status": "PLANNED",
+        "goal": "",
+        "complainant_name": "Vis",
+        "issue_type": "pothole",
+        "severity": null,
+        "confidence": null,
+        "latitude": 12.97,
+        "longitude": 77.59,
+        "image_before_url": "http://example.com/a.jpg",
+        "image_after_url": null,
+        "official_token": null,
+        "current_strategy": null,
+        "sla_deadline": null,
+        "escalation_level": 0,
+        "timeline": [],
+        "paritok_metrics": null,
+        "created_at": "2026-08-04T22:11:36.682350",
+        "updated_at": "2026-08-04T22:11:36.682389"
     }
 }

@@ -7,6 +7,7 @@ from config import DEFAULT_ROUTING
 from tools.portal_client import submit_to_portal_hybrid
 from db.base import BaseDatabase
 from agents.paritok_optimizer import ParitokContextOptimizer
+from agents.evidence_retrieval import civic_evidence_agent
 
 logger = logging.getLogger("acirp.planner")
 
@@ -52,12 +53,14 @@ class PlanningAgent:
             })
 
             # Format conversation history
-
             history = [{"role": e.stage.lower(), "content": e.decision} for e in incident.timeline]
 
-            # Paritok Optimization
-            raw_prompt = f"Determine optimal municipal routing for {incident.issue_type} at GPS ({incident.latitude}, {incident.longitude})."
-            system_rules = "Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry."
+            # Assemble Civic Knowledge Bundle (~5,200 tokens)
+            evidence = civic_evidence_agent.assemble_evidence_bundle(incident)
+            raw_evidence = evidence["raw_evidence_bundle"]
+
+            system_rules = "Evaluate KMCA 1976 statutory mandates, Sakala SLA rules, contractor penalty clauses (Clause 18.5), and historical precedents."
+            raw_prompt = f"Determine optimal municipal routing for {incident.issue_type} at GPS ({incident.latitude}, {incident.longitude}).\n\n{raw_evidence}"
             _, paritok_metrics = await self.paritok.optimize_context(
                 raw_prompt=raw_prompt,
                 system_rules=system_rules,
@@ -67,7 +70,6 @@ class PlanningAgent:
             )
 
             # If we found resolved incidents nearby, check if they used a customized or faster route
-
             if nearby_resolved:
                 fastest_inc = min(
                     nearby_resolved, key=lambda x: x.current_strategy.sla_hours if x.current_strategy else 999)
@@ -83,11 +85,12 @@ class PlanningAgent:
                 stage="PLANNER",
                 decision="Selected strategy workflow",
                 confidence="100%",
-                reason=reason,
+                reason=f"{reason} Assembled Civic Evidence Bundle ({evidence['document_count']} statutory & SLA docs). Paritok optimized context payload.",
                 next_action="Filing complaint petition to department registry",
                 paritok_metrics=paritok_metrics
             )
             incident.timeline.append(event)
+
             incident.paritok_metrics = paritok_metrics
 
             incident.status = "SUBMITTED"

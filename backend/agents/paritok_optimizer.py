@@ -150,7 +150,7 @@ class ParitokContextOptimizer:
             try:
                 from paritok import ParitokEngine
                 from paritok.config import ParitokConfig, GpuServerConfig, CompressionConfig
-                gpu_cfg = GpuServerConfig(api_key=self.api_key, base_url=self.base_url or "https://www.paritok.com/api")
+                gpu_cfg = GpuServerConfig(api_key=self.api_key, base_url="https://www.paritok.com/api")
                 comp_cfg = CompressionConfig(min_tokens=20)
                 cfg = ParitokConfig(use_gpu_server=True, gpu_server=gpu_cfg, compression=comp_cfg)
                 engine = ParitokEngine(config=cfg)
@@ -213,12 +213,13 @@ class ParitokContextOptimizer:
                 else:
                     optimized_prompt = full_original_prompt
             except Exception as e:
-                logger.info(f"Paritok Engine initialization issue ({e}). Using local fallback context optimizer.")
+                logger.error(f"Paritok Engine initialization issue ({type(e).__name__}: {e})", exc_info=True)
+                print(f"========== PARITOK ENGINE EXCEPTION: {type(e).__name__}: {e} ==========")
 
         if not paritok_sdk_success:
-
             # Local Context Pruning Fallback
             optimizer_source = "LOCAL_FALLBACK_OPTIMIZER"
+
             opt_system = self._compress_system_rules(system_rules, pruned_chunks)
             opt_docs, docs_discarded = self._prune_retrieved_docs(retrieved_docs, pruned_chunks)
             opt_history = self._deduplicate_history(conversation_history, pruned_chunks)

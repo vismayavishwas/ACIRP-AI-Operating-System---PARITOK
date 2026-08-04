@@ -1,6 +1,7 @@
 {
   "projects": {
-    "default": "acirp-unstop"
+    "default": "acirp-unstop",
+    "frontend": "acirp-paritok"
   },
   "targets": {},
   "etags": {}

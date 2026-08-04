@@ -9,6 +9,18 @@ from models import ParitokMetrics, PrunedChunk
 
 from config import PARITOK_API_KEY, PARITOK_BASE_URL, PARITOK_MODEL, TOKEN_COST_PER_1K_TOKENS
 
+try:
+    from paritok import ParitokEngine
+    from paritok.config import ParitokConfig, GpuServerConfig, CompressionConfig
+    PARITOK_SDK_AVAILABLE = True
+except ImportError:
+    ParitokEngine = None
+    ParitokConfig = None
+    GpuServerConfig = None
+    CompressionConfig = None
+    PARITOK_SDK_AVAILABLE = False
+
+
 logger = logging.getLogger("acirp.paritok_optimizer")
 
 
@@ -146,16 +158,15 @@ class ParitokContextOptimizer:
         sdk_opt_tokens = 0
         pruned_chunks: List[PrunedChunk] = []
 
-        if self.api_key and self.api_key != "dummy_key_for_offline_mock":
+        if self.api_key and self.api_key != "dummy_key_for_offline_mock" and PARITOK_SDK_AVAILABLE:
             try:
-                from paritok import ParitokEngine
-                from paritok.config import ParitokConfig, GpuServerConfig, CompressionConfig
                 gpu_cfg = GpuServerConfig(api_key=self.api_key, base_url="https://www.paritok.com/api")
                 comp_cfg = CompressionConfig(min_tokens=20)
                 cfg = ParitokConfig(use_gpu_server=True, gpu_server=gpu_cfg, compression=comp_cfg)
                 engine = ParitokEngine(config=cfg)
 
                 # Format request messages for ParitokEngine
+
                 req_msgs = []
                 if system_rules:
                     req_msgs.append({"role": "system", "content": system_rules})

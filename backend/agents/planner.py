@@ -67,8 +67,8 @@ class PlanningAgent:
                 }
             ])
 
-
             # Format conversation history
+
             history = [{"role": e.stage.lower(), "content": e.decision} for e in incident.timeline]
 
             # Paritok Optimization

@@ -437,42 +437,78 @@ function BeforeAfterPromptInspector({ metrics }) {
 // ---------------------------------------------------------
 
 function CumulativeParitokMetricsTable({ incidents = [] }) {
-  // Extract ONLY real logged paritok_metrics from incidents or their timeline events
+  const [dashboardData, setDashboardData] = useState(null);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/paritok/dashboard`);
+        if (res.ok) {
+          const data = await res.json();
+          setDashboardData(data);
+        }
+      } catch (err) {
+        console.error("Error fetching Paritok dashboard metrics:", err);
+      }
+    };
+
+    fetchDashboard();
+    const interval = setInterval(fetchDashboard, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Extract real logged paritok_metrics from incidents or backend dashboard summary
+  const summary = dashboardData?.summary;
   const trials = [];
 
-  incidents.forEach((inc) => {
-    let metrics = inc.paritok_metrics;
-    if (!metrics && inc.timeline) {
-      const evtWithMetrics = inc.timeline.find(e => e.paritok_metrics);
-      if (evtWithMetrics) {
-        metrics = evtWithMetrics.paritok_metrics;
-      }
-    }
-
-    if (metrics && metrics.original_tokens) {
+  if (summary && summary.request_history && summary.request_history.length > 0) {
+    summary.request_history.forEach((req, idx) => {
       trials.push({
-        trialNo: trials.length + 1,
-        id: inc.id,
-        issueType: inc.issue_type || "civic_hazard",
-        complainant: inc.complainant_name || "Citizen",
-        originalTokens: metrics.original_tokens,
-        optimizedTokens: metrics.optimized_tokens,
-        tokensSaved: metrics.tokens_saved,
-        efficiencyPct: metrics.savings_percentage,
-        costSavedUsd: metrics.cost_saved_usd || 0.0,
-        source: metrics.optimizer_source || "PARITOK_HOSTED_API"
+        trialNo: idx + 1,
+        id: req.request_id || `req_${idx + 1}`,
+        issueType: req.request_type || "Civic Incident Triage",
+        complainant: "Citizen",
+        originalTokens: req.original_tokens || 0,
+        optimizedTokens: req.optimized_tokens || 0,
+        tokensSaved: req.tokens_saved || 0,
+        efficiencyPct: req.savings_percentage || 0,
+        costSavedUsd: req.cost_saved_usd || 0.0,
+        source: req.optimizer_source || "PARITOK_HOSTED_API"
       });
-    }
-  });
+    });
+  } else {
+    incidents.forEach((inc) => {
+      let metrics = inc.paritok_metrics;
+      if (!metrics && inc.timeline) {
+        const evtWithMetrics = inc.timeline.find(e => e.paritok_metrics);
+        if (evtWithMetrics) {
+          metrics = evtWithMetrics.paritok_metrics;
+        }
+      }
 
-  const totalOriginal = trials.reduce((acc, t) => acc + t.originalTokens, 0);
-  const totalOptimized = trials.reduce((acc, t) => acc + t.optimizedTokens, 0);
-  const totalSaved = trials.reduce((acc, t) => acc + t.tokensSaved, 0);
-  const totalCostUsd = trials.reduce((acc, t) => acc + t.costSavedUsd, 0);
-  const cumulativeEfficiency = totalOriginal > 0 
-    ? (((totalOriginal - totalOptimized) / totalOriginal) * 100).toFixed(1) 
-    : "0.0";
+      if (metrics && metrics.original_tokens) {
+        trials.push({
+          trialNo: trials.length + 1,
+          id: inc.id,
+          issueType: inc.issue_type || "civic_hazard",
+          complainant: inc.complainant_name || "Citizen",
+          originalTokens: metrics.original_tokens,
+          optimizedTokens: metrics.optimized_tokens,
+          tokensSaved: metrics.tokens_saved,
+          efficiencyPct: metrics.savings_percentage,
+          costSavedUsd: metrics.cost_saved_usd || 0.0,
+          source: metrics.optimizer_source || "PARITOK_HOSTED_API"
+        });
+      }
+    });
+  }
 
+  const totalOriginal = summary && summary.total_original_tokens ? summary.total_original_tokens : trials.reduce((acc, t) => acc + t.originalTokens, 0);
+  const totalOptimized = summary && summary.total_optimized_tokens ? summary.total_optimized_tokens : trials.reduce((acc, t) => acc + t.optimizedTokens, 0);
+  const totalSaved = summary && summary.total_tokens_saved ? summary.total_tokens_saved : trials.reduce((acc, t) => acc + t.tokensSaved, 0);
+  const totalCostUsd = summary && summary.total_cost_saved_usd ? summary.total_cost_saved_usd : trials.reduce((acc, t) => acc + t.costSavedUsd, 0);
+  const cumulativeEfficiency = summary && summary.average_savings_pct !== undefined ? summary.average_savings_pct.toFixed(1) : (totalOriginal > 0 ? (((totalOriginal - totalOptimized) / totalOriginal) * 100).toFixed(1) : "0.0");
+  const isParitokHosted = dashboardData?.active_optimizer_source === "PARITOK_HOSTED_API" || trials.length === 0 || trials.some(t => t.source === "PARITOK_HOSTED_API");
 
   return (
     <div className="bg-[#10172E]/90 border border-cyan-500/30 rounded-2xl p-5 my-6 backdrop-blur-md shadow-2xl text-left">
@@ -494,35 +530,27 @@ function CumulativeParitokMetricsTable({ incidents = [] }) {
             ⚡ Cumulative Savings: <span className="text-emerald-400">{cumulativeEfficiency}%</span>
           </div>
           <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-3 py-1 rounded-xl">
-            💵 Total USD Saved: <span className="text-amber-300">${totalCostUsd.toFixed(5)}</span>
+            💵 Total USD Saved: <span className="text-amber-300">${typeof totalCostUsd === "number" ? totalCostUsd.toFixed(5) : totalCostUsd}</span>
           </div>
         </div>
       </div>
 
-
       {/* Transparent Source Labeling Box */}
-
-      {(() => {
-        const isParitokHosted = trials.length === 0 || trials.some(t => t.source === "PARITOK_HOSTED_API");
-        return (
-          <div className={`rounded-xl p-3 mb-4 flex items-center gap-2.5 text-xs font-mono border ${
-            isParitokHosted
-              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-500/5"
-              : "bg-amber-500/10 border-amber-500/30 text-amber-200 shadow-sm shadow-amber-500/5"
-          }`}>
-            <ShieldCheck className={`h-4.5 w-4.5 flex-shrink-0 ${isParitokHosted ? "text-emerald-400" : "text-amber-400"}`} />
-            <span>
-              <strong>Optimization Status:</strong> {isParitokHosted
-                ? "Paritok API Optimized"
-                : "Paritok API unavailable — using fallback local context optimizer"
-              }
-            </span>
-          </div>
-        );
-      })()}
+      <div className={`rounded-xl p-3 mb-4 flex items-center gap-2.5 text-xs font-mono border ${
+        isParitokHosted
+          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-500/5"
+          : "bg-amber-500/10 border-amber-500/30 text-amber-200 shadow-sm shadow-amber-500/5"
+      }`}>
+        <ShieldCheck className={`h-4.5 w-4.5 flex-shrink-0 ${isParitokHosted ? "text-emerald-400" : "text-amber-400"}`} />
+        <span>
+          <strong>Optimization Status:</strong> {isParitokHosted
+            ? "Paritok API Optimized"
+            : "Paritok API unavailable — using fallback local context optimizer"
+          }
+        </span>
+      </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-
         <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Ideal (Without Paritok)</div>
           <div className="text-base font-extrabold font-mono text-rose-300">{totalOriginal.toLocaleString()} tokens</div>
@@ -537,7 +565,7 @@ function CumulativeParitokMetricsTable({ incidents = [] }) {
         </div>
         <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Cumulative Cost Saved</div>
-          <div className="text-base font-extrabold font-mono text-amber-300">${totalCostUsd.toFixed(5)}</div>
+          <div className="text-base font-extrabold font-mono text-amber-300">${typeof totalCostUsd === "number" ? totalCostUsd.toFixed(5) : totalCostUsd}</div>
         </div>
       </div>
 
@@ -568,7 +596,7 @@ function CumulativeParitokMetricsTable({ incidents = [] }) {
                   </span>
                 </td>
                 <td className="py-2.5 px-3 text-amber-300 font-bold">
-                  ${tr.costSavedUsd ? tr.costSavedUsd.toFixed(5) : "0.00000"}
+                  ${typeof tr.costSavedUsd === "number" ? tr.costSavedUsd.toFixed(5) : tr.costSavedUsd}
                 </td>
               </tr>
             ))}
@@ -584,7 +612,7 @@ function CumulativeParitokMetricsTable({ incidents = [] }) {
                   ⚡ {cumulativeEfficiency}% Average
                 </span>
               </td>
-              <td className="py-3 px-3 text-amber-300">${totalCostUsd.toFixed(5)}</td>
+              <td className="py-3 px-3 text-amber-300">${typeof totalCostUsd === "number" ? totalCostUsd.toFixed(5) : totalCostUsd}</td>
             </tr>
           </tfoot>
         </table>

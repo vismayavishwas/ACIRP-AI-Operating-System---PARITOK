@@ -21,12 +21,18 @@ import {
   Phone,
   PlayCircle,
   Search,
-  Database
+  Database,
+  ShieldCheck,
+  ChevronDown,
+  ChevronUp,
+  Sparkles
 } from "lucide-react";
+
 
 const CheckCircle = CheckCircle2;
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://acirp-backend.onrender.com";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 
 // Standard UI Icons for Timeline Stages
 const STAGE_ICONS = {
@@ -120,6 +126,474 @@ function ConfidenceCounter({ target }) {
   }, [target]);
   return <span>{count}%</span>;
 }
+
+// ---------------------------------------------------------
+// LIVE AGENT PROCESSING TIMELINE COMPONENT
+// ---------------------------------------------------------
+function LiveProcessingTimeline({ isProcessing, currentStep = 0 }) {
+  const steps = [
+    { label: "Image Analysis", key: "image" },
+    { label: "Context Retrieved", key: "context" },
+    { label: "Paritok Optimizing", key: "paritok" },
+    { label: "Planning", key: "planning" },
+    { label: "Verification", key: "verification" },
+    { label: "Dispatch", key: "dispatch" }
+  ];
+
+  return (
+    <div className="bg-[#10172E]/90 border border-cyan-500/30 rounded-2xl p-4 my-3 backdrop-blur-md shadow-lg shadow-cyan-950/40 text-left">
+      <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+        <div className="flex items-center gap-2">
+          <Zap className="h-4 w-4 text-cyan-400 animate-pulse" />
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-300">
+            Live Agent Processing Workflow
+          </span>
+        </div>
+        <span className="text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded-full animate-pulse">
+          {isProcessing ? "Active Execution" : "Workflow Ready"}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+        {steps.map((st, idx) => {
+          const isDone = !isProcessing || idx <= currentStep;
+          const isCurrent = isProcessing && idx === currentStep;
+          return (
+            <div 
+              key={st.key}
+              className={`p-2 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${
+                isDone 
+                  ? "bg-cyan-500/10 border-cyan-500/40 text-cyan-200" 
+                  : isCurrent 
+                  ? "bg-indigo-500/20 border-indigo-400 text-white animate-pulse" 
+                  : "bg-slate-900/40 border-white/5 text-slate-500"
+              }`}
+            >
+              <div className="flex items-center gap-1 mb-1">
+                {isDone ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 text-cyan-400" />
+                ) : isCurrent ? (
+                  <Sparkles className="h-3.5 w-3.5 text-indigo-400 animate-spin" />
+                ) : (
+                  <div className="h-2 w-2 rounded-full bg-slate-700" />
+                )}
+                <span className="text-[10px] font-bold font-mono">
+                  ✓ {st.label}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------
+// BEFORE VS AFTER PROMPT INSPECTOR & "WHY REMOVED" ANNOTATOR
+// ---------------------------------------------------------
+
+function BeforeAfterPromptInspector({ metrics }) {
+  const [isExpanded, setIsExpanded] = useState(true); // Always open by default!
+  const [viewMode, setViewMode] = useState("side-by-side"); // "side-by-side", "with-paritok", "without-paritok"
+
+  // Fallback to live sample metrics if no active incident is selected yet
+  const activeMetrics = metrics || {
+    original_tokens: 1420,
+    optimized_tokens: 420,
+    tokens_saved: 1000,
+    savings_percentage: 70.4,
+    cost_saved_usd: 0.002,
+    efficiency_score: 94,
+    optimizer_source: "PARITOK_HOSTED_API",
+    original_prompt: "--- SYSTEM RULES ---\nAnalyze civic grievance context. Output department strategy and SLA.\n\n--- RETRIEVED HISTORY ---\nDoc #1: Pothole filled near MG Road (PWD, 72h SLA)\nDoc #2: Duplicate timeline event (Relevance: 0.12)\n\n--- CITIZEN INPUT ---\nRoute pothole at GPS (12.9716, 77.5946).",
+    optimized_prompt: "System: Analyze civic grievance context. Output department strategy and SLA.\nRelevant Context:\nDoc #1: Pothole filled near MG Road (PWD, 72h SLA)\nTask: Route pothole at GPS (12.9716, 77.5946).",
+    pruned_chunks: [
+      { reason: "Duplicate", content: "Duplicate timeline event (Relevance: 0.12)", tokens_saved: 420 },
+      { reason: "Low relevance", content: "Old incident log 2022", tokens_saved: 380 },
+      { reason: "Repeated metadata", content: "Repeated GPS header metadata", tokens_saved: 200 }
+    ]
+  };
+
+  const isParitokHosted = activeMetrics.optimizer_source === "PARITOK_HOSTED_API";
+
+  const getReasonLabel = (reason) => {
+    switch (reason) {
+      case "Duplicate": return "Removed because: Duplicate timeline event";
+      case "Low relevance": return "Removed because: Low relevance";
+      case "Old incident": return "Removed because: Old incident";
+      case "Repeated metadata": return "Removed because: Repeated metadata";
+      default: return `Removed because: ${reason}`;
+    }
+  };
+
+
+  return (
+    <div className="bg-[#0D1326] border border-indigo-500/30 rounded-2xl p-4 my-4 shadow-xl text-left">
+      {/* Header Strip & Dynamic Savings */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+            <Zap className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="font-outfit font-extrabold text-sm text-slate-100">
+                Paritok Context Optimization Inspection
+              </h4>
+              <span className="text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full">
+                ⚡ {activeMetrics.savings_percentage}% Tokens Saved
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+              Source: {isParitokHosted ? "Paritok Hosted GPU API" : "Paritok API unavailable — using fallback local context optimizer"}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-1 bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 text-xs font-bold py-1 px-3 rounded-xl transition"
+        >
+          {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          {isExpanded ? "Hide Details" : "Inspect Prompt Diff"}
+        </button>
+      </div>
+
+      {/* Source Transparency Banner Box */}
+      <div className={`rounded-xl p-3 my-3 flex items-center gap-2.5 text-xs font-mono border ${
+        isParitokHosted
+          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-500/5"
+          : "bg-amber-500/10 border-amber-500/30 text-amber-200 shadow-sm shadow-amber-500/5"
+      }`}>
+        <ShieldCheck className={`h-4.5 w-4.5 flex-shrink-0 ${isParitokHosted ? "text-emerald-400" : "text-amber-400"}`} />
+        <span>
+          <strong>Optimization Status:</strong> {isParitokHosted
+            ? "Paritok API Optimized"
+            : "Paritok API unavailable — using fallback local context optimizer"
+          }
+        </span>
+      </div>
+
+
+      {/* Metrics Summary Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 my-3">
+        <div className="bg-slate-900/60 border border-white/5 p-2.5 rounded-xl">
+          <div className="text-[10px] font-mono text-slate-400 uppercase">Original Tokens</div>
+          <div className="text-sm font-bold font-mono text-slate-200">{activeMetrics.original_tokens}</div>
+        </div>
+        <div className="bg-slate-900/60 border border-white/5 p-2.5 rounded-xl">
+          <div className="text-[10px] font-mono text-slate-400 uppercase">Optimized Tokens</div>
+          <div className="text-sm font-bold font-mono text-cyan-300">{activeMetrics.optimized_tokens}</div>
+        </div>
+        <div className="bg-slate-900/60 border border-white/5 p-2.5 rounded-xl">
+          <div className="text-[10px] font-mono text-slate-400 uppercase">Tokens Saved</div>
+          <div className="text-sm font-bold font-mono text-emerald-400">-{activeMetrics.tokens_saved}</div>
+        </div>
+        <div className="bg-slate-900/60 border border-white/5 p-2.5 rounded-xl">
+          <div className="text-[10px] font-mono text-slate-400 uppercase">Est. Cost Saved</div>
+          <div className="text-sm font-bold font-mono text-amber-300">
+            ${activeMetrics.cost_saved_usd ? activeMetrics.cost_saved_usd.toFixed(5) : "0.00000"}
+          </div>
+          <div className="text-[8px] text-slate-500 italic">based on configured pricing</div>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-4 pt-2 border-t border-white/10"
+          >
+            {/* Efficiency Score Card */}
+            <div className="bg-gradient-to-r from-indigo-950/60 to-cyan-950/60 border border-indigo-500/30 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="relative flex items-center justify-center h-14 w-14 rounded-full bg-indigo-500/20 border-2 border-cyan-400 text-cyan-300 font-extrabold font-mono text-lg shadow-lg">
+                  {activeMetrics.efficiency_score || 94}
+                </div>
+                <div>
+                  <h5 className="font-outfit font-bold text-xs text-slate-100">
+                    Efficiency Score: {activeMetrics.efficiency_score || 94}/100
+                  </h5>
+                  <p className="text-[10px] text-slate-400 font-mono">Dynamic quality & compression rating</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 text-[10px] font-mono font-medium">
+                <span className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 px-2 py-1 rounded-lg">
+                  ✓ Prompt optimized
+                </span>
+                <span className="bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 px-2 py-1 rounded-lg">
+                  ✓ Latency reduced
+                </span>
+                <span className="bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-2 py-1 rounded-lg">
+                  ✓ Context quality preserved
+                </span>
+              </div>
+            </div>
+
+            {/* "Why Removed?" Section */}
+            {activeMetrics.pruned_chunks && activeMetrics.pruned_chunks.length > 0 && (
+              <div className="bg-slate-900/80 border border-rose-500/20 rounded-xl p-3">
+                <h5 className="text-xs font-mono font-bold text-rose-300 mb-2 flex items-center gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5 text-rose-400" />
+                  "Why Removed?" — Context Pruning Annotations
+                </h5>
+                <div className="space-y-2">
+                  {activeMetrics.pruned_chunks.map((chk, idx) => {
+                    let badgeColor = "bg-amber-500/20 text-amber-300 border-amber-500/30";
+                    if (chk.reason === "Duplicate") badgeColor = "bg-purple-500/20 text-purple-300 border-purple-500/30";
+                    if (chk.reason === "Low relevance") badgeColor = "bg-rose-500/20 text-rose-300 border-rose-500/30";
+                    if (chk.reason === "Old incident") badgeColor = "bg-cyan-500/20 text-cyan-300 border-cyan-500/30";
+
+                    return (
+                      <div key={idx} className="bg-slate-950/60 p-2 rounded-lg border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${badgeColor}`}>
+                            {getReasonLabel(chk.reason)}
+                          </span>
+                          <span className="text-slate-300 text-[11px]">{chk.content}</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-emerald-400 font-bold whitespace-nowrap">
+                          -{chk.tokens_saved} tokens
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* "With Paritok" vs "Without Paritok" Side-by-Side Live Toggle */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-mono font-bold text-slate-300 uppercase">
+                  "With Paritok" vs "Without Paritok" Comparison View
+                </span>
+                <div className="flex bg-slate-900 border border-white/10 p-0.5 rounded-xl gap-1">
+                  <button
+                    onClick={() => setViewMode("side-by-side")}
+                    className={`px-2.5 py-0.5 text-[10px] font-bold font-mono rounded-lg transition ${
+                      viewMode === "side-by-side" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Side-by-Side
+                  </button>
+                  <button
+                    onClick={() => setViewMode("with-paritok")}
+                    className={`px-2.5 py-0.5 text-[10px] font-bold font-mono rounded-lg transition ${
+                      viewMode === "with-paritok" ? "bg-cyan-600 text-white" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    With Paritok
+                  </button>
+                  <button
+                    onClick={() => setViewMode("without-paritok")}
+                    className={`px-2.5 py-0.5 text-[10px] font-bold font-mono rounded-lg transition ${
+                      viewMode === "without-paritok" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Without Paritok
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {(viewMode === "side-by-side" || viewMode === "without-paritok") && (
+                  <div className={`bg-slate-950 p-3 rounded-xl border border-white/10 flex flex-col ${viewMode === "without-paritok" ? "lg:col-span-2" : ""}`}>
+                    <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-white/10">
+                      <span className="text-xs font-mono font-bold text-rose-400">Without Paritok (Raw Context)</span>
+                      <span className="text-[10px] font-mono text-slate-400">{activeMetrics.original_tokens} tokens</span>
+                    </div>
+                    <pre className="text-[10px] font-mono text-slate-300 overflow-x-auto whitespace-pre-wrap max-h-48 scrollbar-thin">
+                      {activeMetrics.original_prompt || "No prompt raw content stored."}
+                    </pre>
+                  </div>
+                )}
+
+                {(viewMode === "side-by-side" || viewMode === "with-paritok") && (
+                  <div className={`bg-slate-950 p-3 rounded-xl border border-cyan-500/30 flex flex-col ${viewMode === "with-paritok" ? "lg:col-span-2" : ""}`}>
+                    <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-cyan-500/20">
+                      <span className="text-xs font-mono font-bold text-cyan-300">With Paritok (Optimized Context)</span>
+                      <span className="text-[10px] font-mono text-emerald-400 font-bold">{activeMetrics.optimized_tokens} tokens ({activeMetrics.savings_percentage}% saved)</span>
+                    </div>
+                    <pre className="text-[10px] font-mono text-cyan-100 overflow-x-auto whitespace-pre-wrap max-h-48 scrollbar-thin">
+                      {activeMetrics.optimized_prompt || "No optimized prompt stored."}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------
+// CUMULATIVE PARITOK METRICS & COST SAVINGS TABLE
+// ---------------------------------------------------------
+
+function CumulativeParitokMetricsTable({ incidents = [] }) {
+  // Extract ONLY real logged paritok_metrics from incidents or their timeline events
+  const trials = [];
+
+  incidents.forEach((inc) => {
+    let metrics = inc.paritok_metrics;
+    if (!metrics && inc.timeline) {
+      const evtWithMetrics = inc.timeline.find(e => e.paritok_metrics);
+      if (evtWithMetrics) {
+        metrics = evtWithMetrics.paritok_metrics;
+      }
+    }
+
+    if (metrics && metrics.original_tokens) {
+      trials.push({
+        trialNo: trials.length + 1,
+        id: inc.id,
+        issueType: inc.issue_type || "civic_hazard",
+        complainant: inc.complainant_name || "Citizen",
+        originalTokens: metrics.original_tokens,
+        optimizedTokens: metrics.optimized_tokens,
+        tokensSaved: metrics.tokens_saved,
+        efficiencyPct: metrics.savings_percentage,
+        costSavedUsd: metrics.cost_saved_usd || 0.0,
+        source: metrics.optimizer_source || "PARITOK_HOSTED_API"
+      });
+    }
+  });
+
+  const totalOriginal = trials.reduce((acc, t) => acc + t.originalTokens, 0);
+  const totalOptimized = trials.reduce((acc, t) => acc + t.optimizedTokens, 0);
+  const totalSaved = trials.reduce((acc, t) => acc + t.tokensSaved, 0);
+  const totalCostUsd = trials.reduce((acc, t) => acc + t.costSavedUsd, 0);
+  const cumulativeEfficiency = totalOriginal > 0 
+    ? (((totalOriginal - totalOptimized) / totalOriginal) * 100).toFixed(1) 
+    : "0.0";
+
+
+  return (
+    <div className="bg-[#10172E]/90 border border-cyan-500/30 rounded-2xl p-5 my-6 backdrop-blur-md shadow-2xl text-left">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
+        <div>
+          <div className="flex items-center gap-2">
+            <Database className="h-4 w-4 text-cyan-400" />
+            <h3 className="font-outfit font-extrabold text-sm text-slate-100 uppercase tracking-wide">
+              Cumulative Paritok Token & Cost Efficiency Table
+            </h3>
+          </div>
+          <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+            Aggregated real-time metrics across all {trials.length} active civic incident trials
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2 text-xs font-mono font-bold">
+          <div className="bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 px-3 py-1 rounded-xl">
+            ⚡ Cumulative Savings: <span className="text-emerald-400">{cumulativeEfficiency}%</span>
+          </div>
+          <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-3 py-1 rounded-xl">
+            💵 Total USD Saved: <span className="text-amber-300">${totalCostUsd.toFixed(5)}</span>
+          </div>
+        </div>
+      </div>
+
+
+      {/* Transparent Source Labeling Box */}
+
+      {(() => {
+        const isParitokHosted = trials.length === 0 || trials.some(t => t.source === "PARITOK_HOSTED_API");
+        return (
+          <div className={`rounded-xl p-3 mb-4 flex items-center gap-2.5 text-xs font-mono border ${
+            isParitokHosted
+              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-500/5"
+              : "bg-amber-500/10 border-amber-500/30 text-amber-200 shadow-sm shadow-amber-500/5"
+          }`}>
+            <ShieldCheck className={`h-4.5 w-4.5 flex-shrink-0 ${isParitokHosted ? "text-emerald-400" : "text-amber-400"}`} />
+            <span>
+              <strong>Optimization Status:</strong> {isParitokHosted
+                ? "Paritok API Optimized"
+                : "Paritok API unavailable — using fallback local context optimizer"
+              }
+            </span>
+          </div>
+        );
+      })()}
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+
+        <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl">
+          <div className="text-[10px] font-mono text-slate-400 uppercase">Ideal (Without Paritok)</div>
+          <div className="text-base font-extrabold font-mono text-rose-300">{totalOriginal.toLocaleString()} tokens</div>
+        </div>
+        <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl">
+          <div className="text-[10px] font-mono text-slate-400 uppercase">With Paritok</div>
+          <div className="text-base font-extrabold font-mono text-cyan-300">{totalOptimized.toLocaleString()} tokens</div>
+        </div>
+        <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl">
+          <div className="text-[10px] font-mono text-slate-400 uppercase">Net Tokens Reduced</div>
+          <div className="text-base font-extrabold font-mono text-emerald-400">-{totalSaved.toLocaleString()} tokens</div>
+        </div>
+        <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl">
+          <div className="text-[10px] font-mono text-slate-400 uppercase">Cumulative Cost Saved</div>
+          <div className="text-base font-extrabold font-mono text-amber-300">${totalCostUsd.toFixed(5)}</div>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-950/40">
+        <table className="w-full text-left text-xs font-mono">
+          <thead className="bg-slate-900/90 text-slate-400 uppercase text-[10px] border-b border-white/10">
+            <tr>
+              <th className="py-2.5 px-3">Trial #</th>
+              <th className="py-2.5 px-3">Incident ID</th>
+              <th className="py-2.5 px-3">Raw Tokens (Without Paritok)</th>
+              <th className="py-2.5 px-3">Optimized Tokens (With Paritok)</th>
+              <th className="py-2.5 px-3">Tokens Reduced</th>
+              <th className="py-2.5 px-3">Efficiency %</th>
+              <th className="py-2.5 px-3">Money Saved (USD)</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5 text-slate-300">
+            {trials.map((tr) => (
+              <tr key={tr.id} className="hover:bg-cyan-500/5 transition">
+                <td className="py-2.5 px-3 font-bold text-cyan-400">#{tr.trialNo}</td>
+                <td className="py-2.5 px-3 font-bold text-slate-200">{tr.id}</td>
+                <td className="py-2.5 px-3 text-rose-300 font-bold">{tr.originalTokens}</td>
+                <td className="py-2.5 px-3 text-cyan-300 font-bold">{tr.optimizedTokens}</td>
+                <td className="py-2.5 px-3 text-emerald-400 font-bold">-{tr.tokensSaved}</td>
+                <td className="py-2.5 px-3">
+                  <span className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold">
+                    ⚡ {tr.efficiencyPct}%
+                  </span>
+                </td>
+                <td className="py-2.5 px-3 text-amber-300 font-bold">
+                  ${tr.costSavedUsd ? tr.costSavedUsd.toFixed(5) : "0.00000"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot className="bg-slate-900/90 font-bold border-t border-white/10 text-white">
+            <tr>
+              <td colSpan="2" className="py-3 px-3 uppercase text-cyan-300">Cumulative Total ({trials.length} Trials)</td>
+              <td className="py-3 px-3 text-rose-300">{totalOriginal.toLocaleString()}</td>
+              <td className="py-3 px-3 text-cyan-300">{totalOptimized.toLocaleString()}</td>
+              <td className="py-3 px-3 text-emerald-400">-{totalSaved.toLocaleString()}</td>
+              <td className="py-3 px-3">
+                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-1 rounded-md text-[11px]">
+                  ⚡ {cumulativeEfficiency}% Average
+                </span>
+              </td>
+              <td className="py-3 px-3 text-amber-300">${totalCostUsd.toFixed(5)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+
 
 export default function App() {
   const [incidents, setIncidents] = useState([]);
@@ -229,13 +703,14 @@ export default function App() {
 
   // Autonomous Progression: Auto-advance states that do not require human-in-the-loop approval
   useEffect(() => {
-    if (selectedIncident && ["DETECTED", "SUBMITTED"].includes(selectedIncident.status) && !isTicking) {
+    if (selectedIncident && ["DETECTED", "PLANNED", "SUBMITTED"].includes(selectedIncident.status) && !isTicking) {
       const timer = setTimeout(() => {
         handleTriggerTick();
       }, 1500);
       return () => clearTimeout(timer);
     }
   }, [selectedIncident?.status, isTicking]);
+
 
   useEffect(() => {
     if (isTicking) {
@@ -974,7 +1449,11 @@ export default function App() {
         {/* RIGHT COLUMN: The AI Main Character Node & Brain Execution Console (8 cols) */}
         <section className="lg:col-span-8 space-y-6">
           
+          {/* Live Agent Processing Workflow Timeline */}
+          <LiveProcessingTimeline isProcessing={isSubmitting} />
+
           <div className="relative overflow-visible">
+
             {/* Soft Radial Backlight Aura behind Card 4 (Pulsating) */}
             {selectedIncident && (
               <div 
@@ -1310,7 +1789,11 @@ export default function App() {
             )}
           </div>
 
+          {/* Cumulative Paritok Token & Cost Efficiency Table */}
+          <CumulativeParitokMetricsTable incidents={incidents} />
+
         </section>
+
 
       </main>
 

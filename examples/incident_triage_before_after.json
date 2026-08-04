@@ -1,0 +1,39 @@
+{
+  "incident_id": "inc_demo_01",
+  "issue_type": "pothole",
+  "gps_coordinates": {
+    "latitude": 12.9716,
+    "longitude": 77.5946
+  },
+  "stage": "PLANNER",
+  "paritok_metrics": {
+    "original_tokens": 1280,
+    "optimized_tokens": 360,
+    "tokens_saved": 920,
+    "savings_percentage": 71.875,
+    "cost_saved_usd": 0.00184,
+    "efficiency_score": 95,
+    "documents_retrieved": 3,
+    "documents_discarded": 1,
+    "context_retained_pct": 66.7,
+    "compression_ratio": 3.56,
+    "optimizer_source": "PARITOK_HOSTED_API",
+    "pruned_chunks": [
+      {
+        "content": "Discarded historical ticket older than SLA threshold: Traffic violation 2023",
+        "reason": "Old incident",
+        "tokens_saved": 310
+      },
+      {
+        "content": "Deduplicated identical timeline entry: 'Assessing visual evidence'",
+        "reason": "Duplicate",
+        "tokens_saved": 210
+      },
+      {
+        "content": "Stripped redundant system prompt guidelines & formatting rules",
+        "reason": "Repeated metadata",
+        "tokens_saved": 400
+      }
+    ]
+  }
+}

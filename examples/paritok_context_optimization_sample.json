@@ -1,0 +1,40 @@
+{
+  "project": "ACIRP AI Operating System - Paritok Integration",
+  "optimization_type": "Context Retrieval & System Rules Pruning",
+  "timestamp": "2026-08-04T10:00:00Z",
+  "benchmark_summary": {
+    "original_tokens": 1420,
+    "optimized_tokens": 420,
+    "tokens_saved": 1000,
+    "savings_percentage": 70.4,
+    "estimated_cost_saved_usd": 0.0020,
+    "efficiency_score": 94,
+    "context_retained_percentage": 88.5,
+    "compression_ratio": 3.38,
+    "optimizer_source": "PARITOK_HOSTED_API"
+  },
+  "pruned_chunks_breakdown": [
+    {
+      "reason": "Repeated metadata",
+      "tokens_saved": 380,
+      "description": "Stripped redundant system prompt guidelines, repetitive output formatting instructions, and schema preambles while preserving Pydantic schema validation."
+    },
+    {
+      "reason": "Duplicate",
+      "tokens_saved": 240,
+      "description": "Deduplicated identical timeline status polling events and duplicate ticket logs."
+    },
+    {
+      "reason": "Low relevance",
+      "tokens_saved": 220,
+      "description": "Filtered out non-essential historical records with similarity score < 0.30."
+    },
+    {
+      "reason": "Old incident",
+      "tokens_saved": 160,
+      "description": "Discarded historical tickets older than SLA retention threshold (30 days)."
+    }
+  ],
+  "original_prompt_sample": "--- SYSTEM RULES ---\nAnalyze this image representing a civic incident. Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.70 and set category to 'unknown'. Estimate severity (low, medium, high) based on safety risk. Provide a concise engineering reason for the detection.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\nDoc #1: {'id': 'inc_4821', 'department': 'Public Works Dept (PWD)', 'summary': 'Pothole filled near MG Road (SLA: 72h)', 'relevance': 0.88, 'age_days': 12}\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.12, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n[system]: Incident upload received\n[perception]: Detected pothole with 88% confidence\n[perception]: Detected pothole with 88% confidence\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+  "optimized_prompt_sample": "System: Classify civic hazard ('pothole', 'fallen_tree', 'garbage', 'unknown') and severity.\n\nRelevant Context:\n- Public Works Dept (PWD): Pothole filled near MG Road (SLA: 72h)\n\nMemory:\n[perception]: Detected pothole with 88% confidence\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+}

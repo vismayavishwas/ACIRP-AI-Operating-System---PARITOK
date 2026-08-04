@@ -548,5 +548,1479 @@
         ],
         "created_at": "2026-06-30T00:12:30.488232",
         "updated_at": "2026-06-30T00:12:33.592903"
+    },
+    "inc_a69e79dc": {
+        "id": "inc_a69e79dc",
+        "status": "PLANNED",
+        "goal": "Resolve garbage incident with medium severity",
+        "complainant_name": "vis",
+        "issue_type": "garbage",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_a69e79dc_before.avif",
+        "image_after_url": null,
+        "official_token": null,
+        "current_strategy": null,
+        "sla_deadline": null,
+        "escalation_level": 0,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 10:20",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:20",
+                "stage": "PERCEPTION",
+                "decision": "Detected garbage",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 178,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 42,
+                    "savings_percentage": 23.6,
+                    "cost_saved_usd": 8.4e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.31,
+                    "optimizer_source": "LOCAL_FALLBACK_OPTIMIZER",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'garbage.avif', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'garbage.avif', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 178,
+            "optimized_tokens": 136,
+            "tokens_saved": 42,
+            "savings_percentage": 23.6,
+            "cost_saved_usd": 8.4e-05,
+            "efficiency_score": 68,
+            "documents_retrieved": 1,
+            "documents_discarded": 0,
+            "context_retained_pct": 100.0,
+            "compression_ratio": 1.31,
+            "optimizer_source": "LOCAL_FALLBACK_OPTIMIZER",
+            "pruned_chunks": [
+                {
+                    "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                    "reason": "Repeated metadata",
+                    "tokens_saved": 31
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'garbage.avif', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+            "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'garbage.avif', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+        },
+        "created_at": "2026-08-04T10:20:26.489468",
+        "updated_at": "2026-08-04T10:20:26.767397"
+    },
+    "inc_32ef168d": {
+        "id": "inc_32ef168d",
+        "status": "SUBMITTED",
+        "goal": "Resolve pothole incident using Public Works Dept (PWD) route",
+        "complainant_name": "vis",
+        "issue_type": "pothole",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_32ef168d_before.jpeg",
+        "image_after_url": null,
+        "official_token": null,
+        "current_strategy": {
+            "name": "Public Works Route",
+            "department": "Public Works Dept (PWD)",
+            "sla_hours": 72,
+            "escalation_path": [
+                "Chief PWD Engineer",
+                "Social Escalation"
+            ]
+        },
+        "sla_deadline": null,
+        "escalation_level": 0,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 10:23",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:23",
+                "stage": "PERCEPTION",
+                "decision": "Detected pothole",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 178,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 42,
+                    "savings_percentage": 23.6,
+                    "cost_saved_usd": 8.4e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.31,
+                    "optimizer_source": "LOCAL_FALLBACK_OPTIMIZER",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            },
+            {
+                "timestamp": "04 Aug 10:23",
+                "stage": "PLANNER",
+                "decision": "Selected strategy workflow",
+                "confidence": "100%",
+                "reason": "No resolved cases found nearby. Loaded default routing for pothole.",
+                "next_action": "Filing complaint petition to department registry",
+                "paritok_metrics": {
+                    "original_tokens": 141,
+                    "optimized_tokens": 72,
+                    "tokens_saved": 69,
+                    "savings_percentage": 48.9,
+                    "cost_saved_usd": 0.000138,
+                    "efficiency_score": 58,
+                    "documents_retrieved": 2,
+                    "documents_discarded": 1,
+                    "context_retained_pct": 50.0,
+                    "compression_ratio": 1.96,
+                    "optimizer_source": "LOCAL_FALLBACK_OPTIMIZER",
+                    "pruned_chunks": [
+                        {
+                            "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                            "reason": "Low relevance",
+                            "tokens_saved": 27
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+                    "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+                }
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 141,
+            "optimized_tokens": 72,
+            "tokens_saved": 69,
+            "savings_percentage": 48.9,
+            "cost_saved_usd": 0.000138,
+            "efficiency_score": 58,
+            "documents_retrieved": 2,
+            "documents_discarded": 1,
+            "context_retained_pct": 50.0,
+            "compression_ratio": 1.96,
+            "optimizer_source": "LOCAL_FALLBACK_OPTIMIZER",
+            "pruned_chunks": [
+                {
+                    "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                    "reason": "Low relevance",
+                    "tokens_saved": 27
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+            "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+        },
+        "created_at": "2026-08-04T10:23:50.413142",
+        "updated_at": "2026-08-04T10:23:59.791743"
+    },
+    "inc_9dd0eed0": {
+        "id": "inc_9dd0eed0",
+        "status": "ESCALATED",
+        "goal": "Resolve pothole incident using Public Works Dept (PWD) route",
+        "complainant_name": "v",
+        "issue_type": "pothole",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_9dd0eed0_before.jpeg",
+        "image_after_url": null,
+        "official_token": "BBMP-17DC5",
+        "current_strategy": {
+            "name": "Public Works Route",
+            "department": "Public Works Dept (PWD)",
+            "sla_hours": 72,
+            "escalation_path": [
+                "Chief PWD Engineer",
+                "Social Escalation"
+            ]
+        },
+        "sla_deadline": "2026-08-04T09:29:05.747900",
+        "escalation_level": 0,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 10:27",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:27",
+                "stage": "PERCEPTION",
+                "decision": "Detected pothole",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 178,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 42,
+                    "savings_percentage": 23.6,
+                    "cost_saved_usd": 8.4e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.31,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            },
+            {
+                "timestamp": "04 Aug 10:28",
+                "stage": "PLANNER",
+                "decision": "Selected strategy workflow",
+                "confidence": "100%",
+                "reason": "No resolved cases found nearby. Loaded default routing for pothole.",
+                "next_action": "Filing complaint petition to department registry",
+                "paritok_metrics": {
+                    "original_tokens": 141,
+                    "optimized_tokens": 72,
+                    "tokens_saved": 69,
+                    "savings_percentage": 48.9,
+                    "cost_saved_usd": 0.000138,
+                    "efficiency_score": 58,
+                    "documents_retrieved": 2,
+                    "documents_discarded": 1,
+                    "context_retained_pct": 50.0,
+                    "compression_ratio": 1.96,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                            "reason": "Low relevance",
+                            "tokens_saved": 27
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+                    "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+                }
+            },
+            {
+                "timestamp": "04 Aug 10:28",
+                "stage": "SYSTEM",
+                "decision": "Submitting complaint ticket",
+                "confidence": "100%",
+                "reason": "Submitting official complaint to municipal portal",
+                "next_action": "Awaiting tracking token confirmation from government registry",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:28",
+                "stage": "TOOL",
+                "decision": "Filed official complaint",
+                "confidence": "100%",
+                "reason": "Municipal registry confirmed receipt and generated tracking token: BBMP-17DC5",
+                "next_action": "Monitoring portal database for resolution update",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:29",
+                "stage": "MONITOR",
+                "decision": "SLA Breach Detected",
+                "confidence": "100%",
+                "reason": "Ticket unresolved after SLA window of 72 hours.",
+                "next_action": "Escalate ticket to higher authority",
+                "paritok_metrics": null
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 141,
+            "optimized_tokens": 72,
+            "tokens_saved": 69,
+            "savings_percentage": 48.9,
+            "cost_saved_usd": 0.000138,
+            "efficiency_score": 58,
+            "documents_retrieved": 2,
+            "documents_discarded": 1,
+            "context_retained_pct": 50.0,
+            "compression_ratio": 1.96,
+            "optimizer_source": "PARITOK_HOSTED_API",
+            "pruned_chunks": [
+                {
+                    "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                    "reason": "Low relevance",
+                    "tokens_saved": 27
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+            "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+        },
+        "created_at": "2026-08-04T10:27:59.348006",
+        "updated_at": "2026-08-04T10:29:05.760209"
+    },
+    "inc_2e9f1c00": {
+        "id": "inc_2e9f1c00",
+        "status": "MONITORING",
+        "goal": "Resolve pothole incident using Public Works Dept (PWD) route",
+        "complainant_name": "vis",
+        "issue_type": "pothole",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_2e9f1c00_before.jpeg",
+        "image_after_url": null,
+        "official_token": "BBMP-AF401",
+        "current_strategy": {
+            "name": "Public Works Route",
+            "department": "Public Works Dept (PWD)",
+            "sla_hours": 72,
+            "escalation_path": [
+                "Chief PWD Engineer",
+                "Social Escalation"
+            ]
+        },
+        "sla_deadline": "2026-08-07T10:36:28.657587",
+        "escalation_level": 0,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 10:36",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:36",
+                "stage": "PERCEPTION",
+                "decision": "Detected pothole",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 178,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 42,
+                    "savings_percentage": 23.6,
+                    "cost_saved_usd": 8.4e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.31,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            },
+            {
+                "timestamp": "04 Aug 10:36",
+                "stage": "PLANNER",
+                "decision": "Selected strategy workflow",
+                "confidence": "100%",
+                "reason": "No resolved cases found nearby. Loaded default routing for pothole.",
+                "next_action": "Filing complaint petition to department registry",
+                "paritok_metrics": {
+                    "original_tokens": 141,
+                    "optimized_tokens": 72,
+                    "tokens_saved": 69,
+                    "savings_percentage": 48.9,
+                    "cost_saved_usd": 0.000138,
+                    "efficiency_score": 58,
+                    "documents_retrieved": 2,
+                    "documents_discarded": 1,
+                    "context_retained_pct": 50.0,
+                    "compression_ratio": 1.96,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                            "reason": "Low relevance",
+                            "tokens_saved": 27
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+                    "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+                }
+            },
+            {
+                "timestamp": "04 Aug 10:36",
+                "stage": "SYSTEM",
+                "decision": "Submitting complaint ticket",
+                "confidence": "100%",
+                "reason": "Submitting official complaint to municipal portal",
+                "next_action": "Awaiting tracking token confirmation from government registry",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:36",
+                "stage": "TOOL",
+                "decision": "Filed official complaint",
+                "confidence": "100%",
+                "reason": "Municipal registry confirmed receipt and generated tracking token: BBMP-AF401",
+                "next_action": "Monitoring portal database for resolution update",
+                "paritok_metrics": null
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 141,
+            "optimized_tokens": 72,
+            "tokens_saved": 69,
+            "savings_percentage": 48.9,
+            "cost_saved_usd": 0.000138,
+            "efficiency_score": 58,
+            "documents_retrieved": 2,
+            "documents_discarded": 1,
+            "context_retained_pct": 50.0,
+            "compression_ratio": 1.96,
+            "optimizer_source": "PARITOK_HOSTED_API",
+            "pruned_chunks": [
+                {
+                    "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                    "reason": "Low relevance",
+                    "tokens_saved": 27
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+            "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+        },
+        "created_at": "2026-08-04T10:36:14.465635",
+        "updated_at": "2026-08-04T10:36:28.657663"
+    },
+    "inc_9f503e1a": {
+        "id": "inc_9f503e1a",
+        "status": "MONITORING",
+        "goal": "Resolve pothole incident using Public Works Dept (PWD) route",
+        "complainant_name": "vis",
+        "issue_type": "pothole",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_9f503e1a_before.jpeg",
+        "image_after_url": null,
+        "official_token": "BBMP-94876",
+        "current_strategy": {
+            "name": "Public Works Route",
+            "department": "Public Works Dept (PWD)",
+            "sla_hours": 72,
+            "escalation_path": [
+                "Chief PWD Engineer",
+                "Social Escalation"
+            ]
+        },
+        "sla_deadline": "2026-08-04T22:42:22.564769",
+        "escalation_level": 1,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 10:41",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:41",
+                "stage": "PERCEPTION",
+                "decision": "Detected pothole",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 178,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 42,
+                    "savings_percentage": 23.6,
+                    "cost_saved_usd": 8.4e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.31,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            },
+            {
+                "timestamp": "04 Aug 10:41",
+                "stage": "PLANNER",
+                "decision": "Selected strategy workflow",
+                "confidence": "100%",
+                "reason": "No resolved cases found nearby. Loaded default routing for pothole.",
+                "next_action": "Filing complaint petition to department registry",
+                "paritok_metrics": {
+                    "original_tokens": 141,
+                    "optimized_tokens": 72,
+                    "tokens_saved": 69,
+                    "savings_percentage": 48.9,
+                    "cost_saved_usd": 0.000138,
+                    "efficiency_score": 58,
+                    "documents_retrieved": 2,
+                    "documents_discarded": 1,
+                    "context_retained_pct": 50.0,
+                    "compression_ratio": 1.96,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                            "reason": "Low relevance",
+                            "tokens_saved": 27
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+                    "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+                }
+            },
+            {
+                "timestamp": "04 Aug 10:41",
+                "stage": "SYSTEM",
+                "decision": "Submitting complaint ticket",
+                "confidence": "100%",
+                "reason": "Submitting official complaint to municipal portal",
+                "next_action": "Awaiting tracking token confirmation from government registry",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:41",
+                "stage": "TOOL",
+                "decision": "Filed official complaint",
+                "confidence": "100%",
+                "reason": "Municipal registry confirmed receipt and generated tracking token: BBMP-94876",
+                "next_action": "Monitoring portal database for resolution update",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:41",
+                "stage": "MONITOR",
+                "decision": "SLA Breach Detected",
+                "confidence": "100%",
+                "reason": "Ticket unresolved after SLA window of 72 hours.",
+                "next_action": "Escalate ticket to higher authority",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 10:42",
+                "stage": "ESCALATION",
+                "decision": "Escalated to Chief PWD Engineer",
+                "confidence": "100%",
+                "reason": "Human approved escalation. Strategy shifting to level 1.",
+                "next_action": "Monitoring response from Chief PWD Engineer",
+                "paritok_metrics": null
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 141,
+            "optimized_tokens": 72,
+            "tokens_saved": 69,
+            "savings_percentage": 48.9,
+            "cost_saved_usd": 0.000138,
+            "efficiency_score": 58,
+            "documents_retrieved": 2,
+            "documents_discarded": 1,
+            "context_retained_pct": 50.0,
+            "compression_ratio": 1.96,
+            "optimizer_source": "PARITOK_HOSTED_API",
+            "pruned_chunks": [
+                {
+                    "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                    "reason": "Low relevance",
+                    "tokens_saved": 27
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+            "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+        },
+        "created_at": "2026-08-04T10:41:31.530218",
+        "updated_at": "2026-08-04T10:41:44.529280"
+    },
+    "inc_bbef96f4": {
+        "id": "inc_bbef96f4",
+        "status": "SUBMITTED",
+        "goal": "Resolve pothole incident using Public Works Dept (PWD) route",
+        "complainant_name": "Test Citizen",
+        "issue_type": "pothole",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_bbef96f4_before.jpg",
+        "image_after_url": null,
+        "official_token": null,
+        "current_strategy": {
+            "name": "Public Works Route",
+            "department": "Public Works Dept (PWD)",
+            "sla_hours": 72,
+            "escalation_path": [
+                "Chief PWD Engineer",
+                "Social Escalation"
+            ]
+        },
+        "sla_deadline": null,
+        "escalation_level": 0,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 11:21",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:21",
+                "stage": "PERCEPTION",
+                "decision": "Detected pothole",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 177,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 41,
+                    "savings_percentage": 23.2,
+                    "cost_saved_usd": 8.2e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.3,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'test.jpg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'test.jpg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            },
+            {
+                "timestamp": "04 Aug 11:21",
+                "stage": "PLANNER",
+                "decision": "Selected strategy workflow",
+                "confidence": "100%",
+                "reason": "No resolved cases found nearby. Loaded default routing for pothole.",
+                "next_action": "Filing complaint petition to department registry",
+                "paritok_metrics": {
+                    "original_tokens": 141,
+                    "optimized_tokens": 72,
+                    "tokens_saved": 69,
+                    "savings_percentage": 48.9,
+                    "cost_saved_usd": 0.000138,
+                    "efficiency_score": 58,
+                    "documents_retrieved": 2,
+                    "documents_discarded": 1,
+                    "context_retained_pct": 50.0,
+                    "compression_ratio": 1.96,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                            "reason": "Low relevance",
+                            "tokens_saved": 27
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+                    "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+                }
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 141,
+            "optimized_tokens": 72,
+            "tokens_saved": 69,
+            "savings_percentage": 48.9,
+            "cost_saved_usd": 0.000138,
+            "efficiency_score": 58,
+            "documents_retrieved": 2,
+            "documents_discarded": 1,
+            "context_retained_pct": 50.0,
+            "compression_ratio": 1.96,
+            "optimizer_source": "PARITOK_HOSTED_API",
+            "pruned_chunks": [
+                {
+                    "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                    "reason": "Low relevance",
+                    "tokens_saved": 27
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+            "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+        },
+        "created_at": "2026-08-04T11:21:53.963169",
+        "updated_at": "2026-08-04T11:21:57.023514"
+    },
+    "inc_78dbca01": {
+        "id": "inc_78dbca01",
+        "status": "VERIFYING",
+        "goal": "Resolve pothole incident using Public Works Dept (PWD) route",
+        "complainant_name": "vis",
+        "issue_type": "pothole",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_78dbca01_before.jpeg",
+        "image_after_url": null,
+        "official_token": "BBMP-B1293",
+        "current_strategy": {
+            "name": "Public Works Route",
+            "department": "Public Works Dept (PWD)",
+            "sla_hours": 72,
+            "escalation_path": [
+                "Chief PWD Engineer",
+                "Social Escalation"
+            ]
+        },
+        "sla_deadline": "2026-08-04T23:41:39.120143",
+        "escalation_level": 1,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 11:41",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:41",
+                "stage": "PERCEPTION",
+                "decision": "Detected pothole",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 178,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 42,
+                    "savings_percentage": 23.6,
+                    "cost_saved_usd": 8.4e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.31,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            },
+            {
+                "timestamp": "04 Aug 11:41",
+                "stage": "PLANNER",
+                "decision": "Selected strategy workflow",
+                "confidence": "100%",
+                "reason": "No resolved cases found nearby. Loaded default routing for pothole.",
+                "next_action": "Filing complaint petition to department registry",
+                "paritok_metrics": {
+                    "original_tokens": 141,
+                    "optimized_tokens": 72,
+                    "tokens_saved": 69,
+                    "savings_percentage": 48.9,
+                    "cost_saved_usd": 0.000138,
+                    "efficiency_score": 58,
+                    "documents_retrieved": 2,
+                    "documents_discarded": 1,
+                    "context_retained_pct": 50.0,
+                    "compression_ratio": 1.96,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                            "reason": "Low relevance",
+                            "tokens_saved": 27
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+                    "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+                }
+            },
+            {
+                "timestamp": "04 Aug 11:41",
+                "stage": "SYSTEM",
+                "decision": "Submitting complaint ticket",
+                "confidence": "100%",
+                "reason": "Submitting official complaint to municipal portal",
+                "next_action": "Awaiting tracking token confirmation from government registry",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:41",
+                "stage": "TOOL",
+                "decision": "Filed official complaint",
+                "confidence": "100%",
+                "reason": "Municipal registry confirmed receipt and generated tracking token: BBMP-B1293",
+                "next_action": "Monitoring portal database for resolution update",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:41",
+                "stage": "MONITOR",
+                "decision": "SLA Breach Detected",
+                "confidence": "100%",
+                "reason": "Ticket unresolved after SLA window of 72 hours.",
+                "next_action": "Escalate ticket to higher authority",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:41",
+                "stage": "ESCALATION",
+                "decision": "Escalated to Chief PWD Engineer",
+                "confidence": "100%",
+                "reason": "Human approved escalation. Strategy shifting to level 1.",
+                "next_action": "Monitoring response from Chief PWD Engineer",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:41",
+                "stage": "MONITOR",
+                "decision": "Portal resolution detected",
+                "confidence": "100%",
+                "reason": "External portal marked ticket status as RESOLVED.",
+                "next_action": "Request citizen upload a resolution verification photo",
+                "paritok_metrics": null
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 141,
+            "optimized_tokens": 72,
+            "tokens_saved": 69,
+            "savings_percentage": 48.9,
+            "cost_saved_usd": 0.000138,
+            "efficiency_score": 58,
+            "documents_retrieved": 2,
+            "documents_discarded": 1,
+            "context_retained_pct": 50.0,
+            "compression_ratio": 1.96,
+            "optimizer_source": "PARITOK_HOSTED_API",
+            "pruned_chunks": [
+                {
+                    "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                    "reason": "Low relevance",
+                    "tokens_saved": 27
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+            "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+        },
+        "created_at": "2026-08-04T11:41:17.818408",
+        "updated_at": "2026-08-04T11:41:36.609744"
+    },
+    "inc_264caaef": {
+        "id": "inc_264caaef",
+        "status": "ESCALATED",
+        "goal": "Resolve garbage incident using Waste Management Dept route",
+        "complainant_name": "vis",
+        "issue_type": "garbage",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_264caaef_before.avif",
+        "image_after_url": null,
+        "official_token": "BBMP-CB5A9",
+        "current_strategy": {
+            "name": "Waste Management Route",
+            "department": "Waste Management Dept",
+            "sla_hours": 24,
+            "escalation_path": [
+                "Area Supervisor",
+                "Social Escalation"
+            ]
+        },
+        "sla_deadline": "2026-08-04T10:48:41.294313",
+        "escalation_level": 0,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 11:47",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:47",
+                "stage": "PERCEPTION",
+                "decision": "Detected garbage",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 178,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 42,
+                    "savings_percentage": 23.6,
+                    "cost_saved_usd": 8.4e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.31,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'garbage.avif', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'garbage.avif', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            },
+            {
+                "timestamp": "04 Aug 11:47",
+                "stage": "PLANNER",
+                "decision": "Selected strategy workflow",
+                "confidence": "100%",
+                "reason": "No resolved cases found nearby. Loaded default routing for garbage.",
+                "next_action": "Filing complaint petition to department registry",
+                "paritok_metrics": {
+                    "original_tokens": 140,
+                    "optimized_tokens": 71,
+                    "tokens_saved": 69,
+                    "savings_percentage": 49.3,
+                    "cost_saved_usd": 0.000138,
+                    "efficiency_score": 58,
+                    "documents_retrieved": 2,
+                    "documents_discarded": 1,
+                    "context_retained_pct": 50.0,
+                    "compression_ratio": 1.97,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                            "reason": "Low relevance",
+                            "tokens_saved": 27
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_663d5c34', 'department': 'Waste Management Dept', 'summary': 'Resolved garbage near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected garbage\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for garbage at GPS (12.9716, 77.5946).",
+                    "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Waste Management Dept: Resolved garbage near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected garbage\n\nTask: Determine optimal municipal routing for garbage at GPS (12.9716, 77.5946)."
+                }
+            },
+            {
+                "timestamp": "04 Aug 11:47",
+                "stage": "SYSTEM",
+                "decision": "Submitting complaint ticket",
+                "confidence": "100%",
+                "reason": "Submitting official complaint to municipal portal",
+                "next_action": "Awaiting tracking token confirmation from government registry",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:47",
+                "stage": "TOOL",
+                "decision": "Filed official complaint",
+                "confidence": "100%",
+                "reason": "Municipal registry confirmed receipt and generated tracking token: BBMP-CB5A9",
+                "next_action": "Monitoring portal database for resolution update",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:48",
+                "stage": "MONITOR",
+                "decision": "SLA Breach Detected",
+                "confidence": "100%",
+                "reason": "Ticket unresolved after SLA window of 24 hours.",
+                "next_action": "Escalate ticket to higher authority",
+                "paritok_metrics": null
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 140,
+            "optimized_tokens": 71,
+            "tokens_saved": 69,
+            "savings_percentage": 49.3,
+            "cost_saved_usd": 0.000138,
+            "efficiency_score": 58,
+            "documents_retrieved": 2,
+            "documents_discarded": 1,
+            "context_retained_pct": 50.0,
+            "compression_ratio": 1.97,
+            "optimizer_source": "PARITOK_HOSTED_API",
+            "pruned_chunks": [
+                {
+                    "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                    "reason": "Low relevance",
+                    "tokens_saved": 27
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_663d5c34', 'department': 'Waste Management Dept', 'summary': 'Resolved garbage near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected garbage\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for garbage at GPS (12.9716, 77.5946).",
+            "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Waste Management Dept: Resolved garbage near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected garbage\n\nTask: Determine optimal municipal routing for garbage at GPS (12.9716, 77.5946)."
+        },
+        "created_at": "2026-08-04T11:47:54.373573",
+        "updated_at": "2026-08-04T11:48:41.308631"
+    },
+    "inc_2167d5c1": {
+        "id": "inc_2167d5c1",
+        "status": "MONITORING",
+        "goal": "Resolve garbage incident using Waste Management Dept route",
+        "complainant_name": "v",
+        "issue_type": "garbage",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_2167d5c1_before.avif",
+        "image_after_url": null,
+        "official_token": "BBMP-07EB4",
+        "current_strategy": {
+            "name": "Waste Management Route",
+            "department": "Waste Management Dept",
+            "sla_hours": 24,
+            "escalation_path": [
+                "Area Supervisor",
+                "Social Escalation"
+            ]
+        },
+        "sla_deadline": "2026-08-04T23:49:12.725293",
+        "escalation_level": 1,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 11:49",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:49",
+                "stage": "PERCEPTION",
+                "decision": "Detected garbage",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 178,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 42,
+                    "savings_percentage": 23.6,
+                    "cost_saved_usd": 8.4e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.31,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'garbage.avif', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'garbage.avif', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            },
+            {
+                "timestamp": "04 Aug 11:49",
+                "stage": "PLANNER",
+                "decision": "Selected strategy workflow",
+                "confidence": "100%",
+                "reason": "No resolved cases found nearby. Loaded default routing for garbage.",
+                "next_action": "Filing complaint petition to department registry",
+                "paritok_metrics": {
+                    "original_tokens": 140,
+                    "optimized_tokens": 71,
+                    "tokens_saved": 69,
+                    "savings_percentage": 49.3,
+                    "cost_saved_usd": 0.000138,
+                    "efficiency_score": 58,
+                    "documents_retrieved": 2,
+                    "documents_discarded": 1,
+                    "context_retained_pct": 50.0,
+                    "compression_ratio": 1.97,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                            "reason": "Low relevance",
+                            "tokens_saved": 27
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_663d5c34', 'department': 'Waste Management Dept', 'summary': 'Resolved garbage near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected garbage\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for garbage at GPS (12.9716, 77.5946).",
+                    "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Waste Management Dept: Resolved garbage near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected garbage\n\nTask: Determine optimal municipal routing for garbage at GPS (12.9716, 77.5946)."
+                }
+            },
+            {
+                "timestamp": "04 Aug 11:49",
+                "stage": "SYSTEM",
+                "decision": "Submitting complaint ticket",
+                "confidence": "100%",
+                "reason": "Submitting official complaint to municipal portal",
+                "next_action": "Awaiting tracking token confirmation from government registry",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:49",
+                "stage": "TOOL",
+                "decision": "Filed official complaint",
+                "confidence": "100%",
+                "reason": "Municipal registry confirmed receipt and generated tracking token: BBMP-07EB4",
+                "next_action": "Monitoring portal database for resolution update",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:49",
+                "stage": "MONITOR",
+                "decision": "SLA Breach Detected",
+                "confidence": "100%",
+                "reason": "Ticket unresolved after SLA window of 24 hours.",
+                "next_action": "Escalate ticket to higher authority",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 11:49",
+                "stage": "ESCALATION",
+                "decision": "Escalated to Area Supervisor",
+                "confidence": "100%",
+                "reason": "Human approved escalation. Strategy shifting to level 1.",
+                "next_action": "Monitoring response from Area Supervisor",
+                "paritok_metrics": null
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 140,
+            "optimized_tokens": 71,
+            "tokens_saved": 69,
+            "savings_percentage": 49.3,
+            "cost_saved_usd": 0.000138,
+            "efficiency_score": 58,
+            "documents_retrieved": 2,
+            "documents_discarded": 1,
+            "context_retained_pct": 50.0,
+            "compression_ratio": 1.97,
+            "optimizer_source": "PARITOK_HOSTED_API",
+            "pruned_chunks": [
+                {
+                    "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                    "reason": "Low relevance",
+                    "tokens_saved": 27
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_663d5c34', 'department': 'Waste Management Dept', 'summary': 'Resolved garbage near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected garbage\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for garbage at GPS (12.9716, 77.5946).",
+            "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Waste Management Dept: Resolved garbage near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected garbage\n\nTask: Determine optimal municipal routing for garbage at GPS (12.9716, 77.5946)."
+        },
+        "created_at": "2026-08-04T11:49:03.631902",
+        "updated_at": "2026-08-04T11:49:10.954780"
+    },
+    "inc_f72db7a7": {
+        "id": "inc_f72db7a7",
+        "status": "CLOSED",
+        "goal": "Resolve pothole incident using Public Works Dept (PWD) route",
+        "complainant_name": "vis",
+        "issue_type": "pothole",
+        "severity": "medium",
+        "confidence": 0.88,
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "image_before_url": "/static/inc_f72db7a7_before.jpeg",
+        "image_after_url": "/static/inc_f72db7a7_after.webp",
+        "official_token": "BBMP-9FF44",
+        "current_strategy": {
+            "name": "Public Works Route",
+            "department": "Public Works Dept (PWD)",
+            "sla_hours": 72,
+            "escalation_path": [
+                "Chief PWD Engineer",
+                "Social Escalation"
+            ]
+        },
+        "sla_deadline": "2026-08-05T00:02:48.846057",
+        "escalation_level": 2,
+        "timeline": [
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "SYSTEM",
+                "decision": "Incident upload received",
+                "confidence": "100%",
+                "reason": "Citizen filed new incident with GPS coordinates.",
+                "next_action": "Trigger Perception Agent Vision classifier",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "PERCEPTION",
+                "decision": "Detected pothole",
+                "confidence": "88%",
+                "reason": "Failover Mock Active (ClientError: 401 UNAUTHENTICATED. {'error': {'code': ...)",
+                "next_action": "Plan complaint submission",
+                "paritok_metrics": {
+                    "original_tokens": 178,
+                    "optimized_tokens": 136,
+                    "tokens_saved": 42,
+                    "savings_percentage": 23.6,
+                    "cost_saved_usd": 8.4e-05,
+                    "efficiency_score": 68,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.31,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 31
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Analyze this image representing a civic incident.\n        Classify it into one of: 'pothole', 'fallen_tree', 'garbage'.\n        CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0.\n        If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'.\n        Estimate severity (low, medium, high) based on safety risk.\n        Provide a concise engineering reason for the detection.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nImage metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity.",
+                    "optimized_prompt": "System: Classify it into one of: 'pothole', 'fallen_tree', 'garbage'. CRITICAL: If the image shows a clean road, normal street scene, empty pavement, or does not contain any obvious pothole, fallen tree, or garbage pile, you MUST classify it as 'unknown' with a confidence of 0.0. If it does not fit these categories, or is blurred, low-quality, or hard to verify, output a confidence below 0.7 and set category to 'unknown'. Provide a concise engineering reason for the detection.\n\nTask: Image metadata: Filename 'pothole2.jpeg', Location GPS (12.9716, 77.5946). Classify civic hazard type and severity."
+                }
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "PLANNER",
+                "decision": "Selected strategy workflow",
+                "confidence": "100%",
+                "reason": "No resolved cases found nearby. Loaded default routing for pothole.",
+                "next_action": "Filing complaint petition to department registry",
+                "paritok_metrics": {
+                    "original_tokens": 141,
+                    "optimized_tokens": 72,
+                    "tokens_saved": 69,
+                    "savings_percentage": 48.9,
+                    "cost_saved_usd": 0.000138,
+                    "efficiency_score": 58,
+                    "documents_retrieved": 2,
+                    "documents_discarded": 1,
+                    "context_retained_pct": 50.0,
+                    "compression_ratio": 1.96,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Filtered low-relevance record: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violat...",
+                            "reason": "Low relevance",
+                            "tokens_saved": 27
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\nEvaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\n--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---\n\nDoc #1: {'id': 'inc_79e0fc75', 'department': 'Public Works Dept (PWD)', 'summary': 'Resolved pothole near (12.9716, 77.5946)', 'relevance': 0.85, 'age_days': 12}\n\nDoc #2: {'id': 'inc_old_99', 'department': 'Traffic Police', 'summary': 'Speeding violation record from 2022', 'relevance': 0.15, 'age_days': 450}\n\n--- CONVERSATION MEMORY ---\n\n[system]: Incident upload received\n\n[perception]: Detected pothole\n\n--- CITIZEN REQUEST / INPUT ---\nDetermine optimal municipal routing for pothole at GPS (12.9716, 77.5946).",
+                    "optimized_prompt": "System: Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry.\n\nRelevant Context:\n- Public Works Dept (PWD): Resolved pothole near (12.9716, 77.5946)\n\nMemory:\n[system]: Incident upload received\n[perception]: Detected pothole\n\nTask: Determine optimal municipal routing for pothole at GPS (12.9716, 77.5946)."
+                }
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "SYSTEM",
+                "decision": "Submitting complaint ticket",
+                "confidence": "100%",
+                "reason": "Submitting official complaint to municipal portal",
+                "next_action": "Awaiting tracking token confirmation from government registry",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "TOOL",
+                "decision": "Filed official complaint",
+                "confidence": "100%",
+                "reason": "Municipal registry confirmed receipt and generated tracking token: BBMP-9FF44",
+                "next_action": "Monitoring portal database for resolution update",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "MONITOR",
+                "decision": "SLA Breach Detected",
+                "confidence": "100%",
+                "reason": "Ticket unresolved after SLA window of 72 hours.",
+                "next_action": "Escalate ticket to higher authority",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "ESCALATION",
+                "decision": "Escalated to Chief PWD Engineer",
+                "confidence": "100%",
+                "reason": "Human approved escalation. Strategy shifting to level 1.",
+                "next_action": "Monitoring response from Chief PWD Engineer",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "MONITOR",
+                "decision": "Portal resolution detected",
+                "confidence": "100%",
+                "reason": "External portal marked ticket status as RESOLVED.",
+                "next_action": "Request citizen upload a resolution verification photo",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "VERIFY",
+                "decision": "Verification failed",
+                "confidence": "30%",
+                "reason": "Failover Verification Mock: Proof verification FAILED - hazard detected in proof photo (ClientError: 401 UNAUTHENTICATED. {'error':...)",
+                "next_action": "Escalate ticket to higher authority for review.",
+                "paritok_metrics": {
+                    "original_tokens": 150,
+                    "optimized_tokens": 132,
+                    "tokens_saved": 18,
+                    "savings_percentage": 12.0,
+                    "cost_saved_usd": 3.6e-05,
+                    "efficiency_score": 63,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.14,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 8
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Compare these before and after images of a civic issue.\n        Before Image: Shows a civic hazard (e.g. garbage pile, pothole, fallen tree).\n        After Image: Shows the repaired or cleared state.\n        CRITICAL VERIFICATION RULES:\n        1. If After Image STILL contains civic hazard, set is_resolved=False with confidence < 0.50.\n        2. If After Image depicts clean road/patched pavement/cleared area, evaluate is_resolved=True with confidence > 0.85.\n        Provide resolution confidence score between 0.0 and 1.0 and explain reasoning.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nVerify civic resolution for incident inc_f72db7a7 (pothole). Proof filename: 'garbage.avif'.",
+                    "optimized_prompt": "System: Compare these before and after images of a civic issue. Before Image: Shows a civic hazard (e.g. garbage pile, pothole, fallen tree). After Image: Shows the repaired or cleared state. CRITICAL VERIFICATION RULES: 1. If After Image STILL contains civic hazard, set is_resolved=False with confidence < 0.50. 2. If After Image depicts clean road/patched pavement/cleared area, evaluate is_resolved=True with confidence > 0.85. Provide resolution confidence score between 0.0 and 1.0 and explain reasoning.\n\nTask: Verify civic resolution for incident inc_f72db7a7 (pothole). Proof filename: 'garbage.avif'."
+                }
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "ESCALATION",
+                "decision": "Escalated to Social Escalation",
+                "confidence": "100%",
+                "reason": "Human approved escalation. Strategy shifting to level 2.",
+                "next_action": "Monitoring response from Social Escalation",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "MONITOR",
+                "decision": "Portal resolution detected",
+                "confidence": "100%",
+                "reason": "External portal marked ticket status as RESOLVED.",
+                "next_action": "Request citizen upload a resolution verification photo",
+                "paritok_metrics": null
+            },
+            {
+                "timestamp": "04 Aug 12:02",
+                "stage": "VERIFY",
+                "decision": "Incident verified resolved",
+                "confidence": "95%",
+                "reason": "Failover Verification Mock: Proof verified RESOLVED successfully (ClientError: 401 UNAUTHENTICATED. {'error':...)",
+                "next_action": "Close incident ticket as successfully resolved.",
+                "paritok_metrics": {
+                    "original_tokens": 151,
+                    "optimized_tokens": 133,
+                    "tokens_saved": 18,
+                    "savings_percentage": 11.9,
+                    "cost_saved_usd": 3.6e-05,
+                    "efficiency_score": 63,
+                    "documents_retrieved": 1,
+                    "documents_discarded": 0,
+                    "context_retained_pct": 100.0,
+                    "compression_ratio": 1.14,
+                    "optimizer_source": "PARITOK_HOSTED_API",
+                    "pruned_chunks": [
+                        {
+                            "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                            "reason": "Repeated metadata",
+                            "tokens_saved": 8
+                        }
+                    ],
+                    "original_prompt": "--- SYSTEM RULES ---\n\n        Compare these before and after images of a civic issue.\n        Before Image: Shows a civic hazard (e.g. garbage pile, pothole, fallen tree).\n        After Image: Shows the repaired or cleared state.\n        CRITICAL VERIFICATION RULES:\n        1. If After Image STILL contains civic hazard, set is_resolved=False with confidence < 0.50.\n        2. If After Image depicts clean road/patched pavement/cleared area, evaluate is_resolved=True with confidence > 0.85.\n        Provide resolution confidence score between 0.0 and 1.0 and explain reasoning.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nVerify civic resolution for incident inc_f72db7a7 (pothole). Proof filename: 'clean road.webp'.",
+                    "optimized_prompt": "System: Compare these before and after images of a civic issue. Before Image: Shows a civic hazard (e.g. garbage pile, pothole, fallen tree). After Image: Shows the repaired or cleared state. CRITICAL VERIFICATION RULES: 1. If After Image STILL contains civic hazard, set is_resolved=False with confidence < 0.50. 2. If After Image depicts clean road/patched pavement/cleared area, evaluate is_resolved=True with confidence > 0.85. Provide resolution confidence score between 0.0 and 1.0 and explain reasoning.\n\nTask: Verify civic resolution for incident inc_f72db7a7 (pothole). Proof filename: 'clean road.webp'."
+                }
+            }
+        ],
+        "paritok_metrics": {
+            "original_tokens": 151,
+            "optimized_tokens": 133,
+            "tokens_saved": 18,
+            "savings_percentage": 11.9,
+            "cost_saved_usd": 3.6e-05,
+            "efficiency_score": 63,
+            "documents_retrieved": 1,
+            "documents_discarded": 0,
+            "context_retained_pct": 100.0,
+            "compression_ratio": 1.14,
+            "optimizer_source": "PARITOK_HOSTED_API",
+            "pruned_chunks": [
+                {
+                    "content": "Stripped generic instruction boilerplate & repetitive formatting guidelines.",
+                    "reason": "Repeated metadata",
+                    "tokens_saved": 8
+                }
+            ],
+            "original_prompt": "--- SYSTEM RULES ---\n\n        Compare these before and after images of a civic issue.\n        Before Image: Shows a civic hazard (e.g. garbage pile, pothole, fallen tree).\n        After Image: Shows the repaired or cleared state.\n        CRITICAL VERIFICATION RULES:\n        1. If After Image STILL contains civic hazard, set is_resolved=False with confidence < 0.50.\n        2. If After Image depicts clean road/patched pavement/cleared area, evaluate is_resolved=True with confidence > 0.85.\n        Provide resolution confidence score between 0.0 and 1.0 and explain reasoning.\n        \n\n--- CITIZEN REQUEST / INPUT ---\nVerify civic resolution for incident inc_f72db7a7 (pothole). Proof filename: 'clean road.webp'.",
+            "optimized_prompt": "System: Compare these before and after images of a civic issue. Before Image: Shows a civic hazard (e.g. garbage pile, pothole, fallen tree). After Image: Shows the repaired or cleared state. CRITICAL VERIFICATION RULES: 1. If After Image STILL contains civic hazard, set is_resolved=False with confidence < 0.50. 2. If After Image depicts clean road/patched pavement/cleared area, evaluate is_resolved=True with confidence > 0.85. Provide resolution confidence score between 0.0 and 1.0 and explain reasoning.\n\nTask: Verify civic resolution for incident inc_f72db7a7 (pothole). Proof filename: 'clean road.webp'."
+        },
+        "created_at": "2026-08-04T12:02:21.766425",
+        "updated_at": "2026-08-04T12:02:57.262063"
     }
 }

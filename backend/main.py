@@ -910,7 +910,102 @@ async def download_escalation_letter(incident_id: str):
     )
 
 # ---------------------------------------------------------
+# PARITOK TOKEN-EFFICIENCY API ENDPOINTS
+# ---------------------------------------------------------
+from pydantic import BaseModel as FastAPIModel
+from agents.paritok_optimizer import ParitokContextOptimizer, paritok_session
+
+class OptimizeRequest(FastAPIModel):
+    raw_prompt: str
+    system_rules: Optional[str] = ""
+    retrieved_docs: Optional[List[dict]] = None
+    conversation_history: Optional[List[dict]] = None
+
+@app.get("/api/paritok/dashboard")
+async def get_paritok_dashboard():
+    """
+    Returns live cumulative Paritok token metrics, savings percentage, cost saved,
+    request history log, and active optimizer source.
+    """
+    summary = paritok_session.get_summary()
+    optimizer = ParitokContextOptimizer()
+    source_status = "PARITOK_HOSTED_API" if optimizer.api_key and optimizer.api_key != "dummy_key_for_offline_mock" else "LOCAL_FALLBACK_OPTIMIZER"
+    summary["active_optimizer_source"] = source_status
+    return summary
+
+@app.post("/api/paritok/optimize")
+async def optimize_custom_prompt(req: OptimizeRequest):
+    """
+    Dedicated endpoint to test Paritok context optimization on any custom text or RAG prompt.
+    Returns before vs after prompt, token counts, savings %, efficiency score, and pruned chunk reasons.
+    """
+    optimizer = ParitokContextOptimizer()
+    optimized_prompt, metrics = await optimizer.optimize_context(
+        raw_prompt=req.raw_prompt,
+        system_rules=req.system_rules or "",
+        retrieved_docs=req.retrieved_docs or [],
+        conversation_history=req.conversation_history or [],
+        request_type="Custom Prompt Sandbox Optimization"
+    )
+    return {
+        "original_prompt": metrics.original_prompt,
+        "optimized_prompt": optimized_prompt,
+        "metrics": metrics
+    }
+
+@app.post("/api/paritok/compare")
+async def compare_with_without_paritok(req: OptimizeRequest):
+    """
+    Benchmark endpoint comparing request execution WITH vs WITHOUT Paritok side-by-side.
+    """
+    optimizer = ParitokContextOptimizer()
+    optimized_prompt, metrics = await optimizer.optimize_context(
+        raw_prompt=req.raw_prompt,
+        system_rules=req.system_rules or "",
+        retrieved_docs=req.retrieved_docs or [],
+        conversation_history=req.conversation_history or [],
+        request_type="With vs Without Paritok Benchmark"
+    )
+    
+    cost_without = round((metrics.original_tokens / 1000.0) * optimizer.token_cost, 6)
+    cost_with = round((metrics.optimized_tokens / 1000.0) * optimizer.token_cost, 6)
+    
+    return {
+        "without_paritok": {
+            "prompt": metrics.original_prompt,
+            "tokens": metrics.original_tokens,
+            "estimated_cost_usd": cost_without,
+            "status": "Full uncompressed context with boilerplate noise"
+        },
+        "with_paritok": {
+            "prompt": optimized_prompt,
+            "tokens": metrics.optimized_tokens,
+            "tokens_saved": metrics.tokens_saved,
+            "savings_percentage": metrics.savings_percentage,
+            "estimated_cost_usd": cost_with,
+            "cost_saved_usd": metrics.cost_saved_usd,
+            "efficiency_score": metrics.efficiency_score,
+            "status": "Paritok optimized context (essential facts retained)"
+        },
+        "optimizer_source": metrics.optimizer_source,
+        "pruned_chunks": metrics.pruned_chunks
+    }
+
+@app.get("/api/incidents/{incident_id}/paritok-metrics")
+async def get_incident_paritok_metrics(incident_id: str):
+    """
+    Returns Paritok token metrics and Before vs After prompt inspection details for a specific incident.
+    """
+    incident = db.get_incident(incident_id)
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    return incident.paritok_metrics or {
+        "message": "Paritok metrics pending for this incident."
+    }
+
+# ---------------------------------------------------------
 # STATIC FILE SERVING FOR UPLOADED IMAGES
 # ---------------------------------------------------------
 from fastapi.staticfiles import StaticFiles
 app.mount("/static", StaticFiles(directory=UPLOAD_DIR), name="static")
+

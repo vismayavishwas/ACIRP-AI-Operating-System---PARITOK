@@ -2,6 +2,27 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Literal, Dict, Any
 from datetime import datetime
 
+class PrunedChunk(BaseModel):
+    content: str
+    reason: str  # e.g., "Duplicate timeline event", "Low relevance (<0.30)", "Outdated ticket log", "Repeated system prompt metadata"
+    tokens_saved: int
+
+class ParitokMetrics(BaseModel):
+    original_tokens: int
+    optimized_tokens: int
+    tokens_saved: int
+    savings_percentage: float
+    cost_saved_usd: float
+    efficiency_score: int = Field(description="Dynamic efficiency score between 0 and 100")
+    documents_retrieved: int = 1
+    documents_discarded: int = 0
+    context_retained_pct: float = 100.0
+    compression_ratio: float = 1.0
+    optimizer_source: Literal["PARITOK_HOSTED_API", "LOCAL_FALLBACK_OPTIMIZER"] = "LOCAL_FALLBACK_OPTIMIZER"
+    pruned_chunks: List[PrunedChunk] = []
+    original_prompt: Optional[str] = None
+    optimized_prompt: Optional[str] = None
+
 class TimelineEvent(BaseModel):
     timestamp: str
     stage: Literal["PERCEPTION", "PLANNER", "TOOL", "MONITOR", "VERIFY", "ESCALATION", "SYSTEM"]
@@ -9,6 +30,7 @@ class TimelineEvent(BaseModel):
     confidence: str
     reason: str
     next_action: str
+    paritok_metrics: Optional[ParitokMetrics] = None
 
 class Strategy(BaseModel):
     name: str
@@ -24,6 +46,7 @@ class PlannerDecision(BaseModel):
     next_action: str
     requires_human: bool
     confidence: float
+    paritok_metrics: Optional[ParitokMetrics] = None
 
 class Incident(BaseModel):
     id: str
@@ -45,5 +68,6 @@ class Incident(BaseModel):
     sla_deadline: Optional[str] = None
     escalation_level: int = 0
     timeline: List[TimelineEvent] = []
+    paritok_metrics: Optional[ParitokMetrics] = None
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())

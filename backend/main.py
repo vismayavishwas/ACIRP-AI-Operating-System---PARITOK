@@ -111,6 +111,10 @@ async def create_incident(
     # Run the Perception Agent directly (passing the dynamic MIME type)
     incident = await perception_agent.analyze(image_bytes, incident, mime_type=image.content_type or "image/jpeg", filename=image.filename)
 
+    # Run the Planning Agent strategy determination & Paritok RAG optimization
+    if incident.status == "PLANNED":
+        incident = await planner_agent.execute_step(incident)
+
     # Save to mock database
     db.save_incident(incident)
     return incident

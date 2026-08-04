@@ -205,15 +205,16 @@ def test_download_escalation_letter_and_petition_forms():
 
     form_res = client.get("/api/incidents/inc_download_test/download-form")
     assert form_res.status_code == 200
-    assert "Civic Complaint Form" in form_res.text or "FORMAL COMPLAINT" in form_res.text
+    assert "FORMAL MUNICIPAL LEGAL PETITION" in form_res.text
 
     letter_res = client.get("/api/incidents/inc_download_test/download-escalation-letter")
     assert letter_res.status_code == 200
-    assert "FORMAL COMPLAINT ESCALATION" in letter_res.text
+    assert "FORMAL MUNICIPAL LEGAL PETITION" in letter_res.text
 
 
 @pytest.fixture(scope="session", autouse=True)
 def cleanup_temp_db():
+
     yield
     if os.path.exists(temp_db_path):
         try:

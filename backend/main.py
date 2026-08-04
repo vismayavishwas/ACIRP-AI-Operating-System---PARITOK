@@ -18,6 +18,8 @@ from config import GEMINI_API_KEY
 from agents.perception import PerceptionAgent
 from agents.planner import PlanningAgent
 from agents.verification import VerificationAgent
+from agents.petition_generator import legal_petition_generator
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -497,249 +499,16 @@ async def download_incident_form(incident_id: str):
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
 
-    strategy_name = incident.current_strategy.name if incident.current_strategy else "Pending"
-    dept_name = incident.current_strategy.department if incident.current_strategy else "Pending"
-    sla_val = f"{incident.current_strategy.sla_hours} Hours" if incident.current_strategy else "Pending"
-    conf_val = f"{int(incident.confidence * 100)}%" if incident.confidence else "0%"
-
-    html_content = f"""<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>ACIRP Civic Complaint Form - {incident.id}</title>
-  <style>
-    body {{
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #1e293b;
-      margin: 40px;
-      line-height: 1.6;
-      background: #ffffff;
-    }}
-    .header {{
-      border-bottom: 3px double #cbd5e1;
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }}
-    .header-text h1 {{
-      margin: 0;
-      font-size: 22px;
-      color: #0f172a;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }}
-    .header-text p {{
-      margin: 4px 0 0 0;
-      font-size: 11px;
-      color: #64748b;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }}
-    .badge {{
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1d4ed8;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }}
-    .grid {{
-      display: grid;
-      grid-template-cols: 1fr 1fr;
-      gap: 30px;
-      margin-bottom: 30px;
-    }}
-    .section-title {{
-      font-size: 11px;
-      font-weight: 700;
-      color: #475569;
-      text-transform: uppercase;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 6px;
-      margin-bottom: 12px;
-      letter-spacing: 0.8px;
-    }}
-    .meta-table {{
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }}
-    .meta-table td {{
-      padding: 8px 0;
-      vertical-align: top;
-    }}
-    .meta-table td.label {{
-      color: #64748b;
-      width: 130px;
-      font-weight: 500;
-    }}
-    .meta-table td.value {{
-      font-weight: 600;
-      color: #0f172a;
-    }}
-    .statement-box {{
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 18px;
-      font-size: 13px;
-      color: #334155;
-      margin-bottom: 40px;
-      border-left: 4px solid #1a73e8;
-    }}
-    .footer {{
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-top: 60px;
-      font-size: 11px;
-      color: #64748b;
-      border-top: 1px solid #cbd5e1;
-      padding-top: 20px;
-    }}
-    .signature {{
-      text-align: right;
-    }}
-    .signature-line {{
-      width: 220px;
-      border-top: 1px solid #0f172a;
-      margin-bottom: 6px;
-      margin-left: auto;
-    }}
-    .signature-title {{
-      font-weight: 600;
-      color: #0f172a;
-      font-size: 12px;
-    }}
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="header-text">
-      <h1>Municipal Civic Complaint Form</h1>
-      <p>Automatically Compiled by ACIRP Orchestration System</p>
-    </div>
-    <div class="badge">Official AI Filing Node</div>
-  </div>
-
-  <div class="grid">
-    <div>
-      <div class="section-title">Complainant Details</div>
-      <table class="meta-table">
-        <tr>
-          <td class="label">Filer Name</td>
-          <td class="value">{incident.complainant_name}</td>
-        </tr>
-        <tr>
-          <td class="label">Filer Type</td>
-          <td class="value">Autonomous AI Filer Agent (ACIRP Platform)</td>
-        </tr>
-        <tr>
-          <td class="label">Filing Agency</td>
-          <td class="value">Google Build with AI Hackathon Node</td>
-        </tr>
-        <tr>
-          <td class="label">Core Engine</td>
-          <td class="value">ACIRP System Node v1.2.0</td>
-        </tr>
-      </table>
-    </div>
-
-    <div>
-      <div class="section-title">Complaint Specifications</div>
-      <table class="meta-table">
-        <tr>
-          <td class="label">Reference ID</td>
-          <td class="value" style="font-family: monospace; font-size: 12px;">{incident.id}</td>
-        </tr>
-        <tr>
-          <td class="label">Tracking Token</td>
-          <td class="value" style="font-family: monospace; font-size: 12px;">{incident.official_token or "Awaiting Dispatch"}</td>
-        </tr>
-        <tr>
-          <td class="label">Filing Date</td>
-          <td class="value">{incident.created_at}</td>
-        </tr>
-        <tr>
-          <td class="label">Current Status</td>
-          <td class="value" style="color: #1d4ed8; text-transform: uppercase;">{incident.status}</td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div class="section-title">Filing Parameters & Routing Strategy</div>
-  <div class="grid">
-    <div>
-      <table class="meta-table">
-        <tr>
-          <td class="label">GPS Coordinates</td>
-          <td class="value">Lat: {incident.latitude}, Lng: {incident.longitude}</td>
-        </tr>
-        <tr>
-          <td class="label">Issue Category</td>
-          <td class="value" style="text-transform: uppercase;">{incident.issue_type or "Unclassified"}</td>
-        </tr>
-        <tr>
-          <td class="label">Severity Level</td>
-          <td class="value" style="text-transform: uppercase;">{incident.severity or "Low"}</td>
-        </tr>
-      </table>
-    </div>
-
-    <div>
-      <table class="meta-table">
-        <tr>
-          <td class="label">Target Department</td>
-          <td class="value">{dept_name}</td>
-        </tr>
-        <tr>
-          <td class="label">Routing Strategy</td>
-          <td class="value">{strategy_name}</td>
-        </tr>
-        <tr>
-          <td class="label">Resolution SLA</td>
-          <td class="value">{sla_val}</td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div class="section-title">Detailed Statement & AI Certification</div>
-  <div class="statement-box">
-    This complaint is filed automatically regarding a civic hazard detected at the coordinates listed above.
-    Our perception vision analysis has confirmed the issue with <strong>{conf_val}</strong> confidence.
-    <br><br>
-    The target authority (<strong>{dept_name}</strong>) is requested to dispatch a resolution team.
-    ACIRP will continuously monitor the portal status and escalate this complaint if it is not resolved within the SLA period.
-  </div>
-
-
-  <div class="footer">
-    <div>
-      System Timestamp: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-    </div>
-    <div class="signature">
-      <div class="signature-line"></div>
-      <div class="signature-title">ACIRP Autonomous Agent Engine</div>
-      <div>Verification Node Cryptographic Signature</div>
-    </div>
-  </div>
-</body>
-</html>
-"""
+    res = await legal_petition_generator.generate_petition(
+        incident,
+        escalation_target="Ward Junior Engineer & Nodal Officer"
+    )
     from fastapi.responses import Response
     return Response(
-        content=html_content,
+        content=res["html_petition"],
         media_type="text/html",
         headers={
-            "Content-Disposition": f"attachment; filename=ACIRP_Complaint_{incident_id}.html"
+            "Content-Disposition": f"attachment; filename=ACIRP_Petition_{incident_id}.html"
         }
     )
 
@@ -751,192 +520,23 @@ async def download_escalation_letter(incident_id: str):
         raise HTTPException(status_code=404, detail="Incident not found")
 
     escalation_paths = incident.current_strategy.escalation_path if incident.current_strategy else []
-    # If level is 0, default to the first one in the list, otherwise use the level index
     target_idx = max(0, incident.escalation_level - 1)
     escalation_target = escalation_paths[target_idx] if target_idx < len(
         escalation_paths) else "Zonal Administration Commissioner"
 
-    html_content = f"""<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>OFFICIAL ESCALATION NOTICE - {incident.id}</title>
-  <style>
-    body {{
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #1e293b;
-      margin: 50px;
-      line-height: 1.8;
-      background: #ffffff;
-    }}
-    .letterhead {{
-      border-bottom: 2px solid #0f172a;
-      padding-bottom: 15px;
-      margin-bottom: 30px;
-      text-align: center;
-    }}
-    .letterhead h1 {{
-      margin: 0;
-      font-size: 24px;
-      color: #0f172a;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }}
-    .letterhead p {{
-      margin: 5px 0 0 0;
-      font-size: 11px;
-      color: #475569;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-weight: 600;
-    }}
-    .date-row {{
-      text-align: right;
-      font-size: 13px;
-      color: #475569;
-      margin-bottom: 30px;
-    }}
-    .recipient {{
-      margin-bottom: 30px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #0f172a;
-    }}
-    .subject {{
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 30px;
-      border-bottom: 1px dashed #cbd5e1;
-      padding-bottom: 8px;
-      font-size: 14px;
-      color: #0f172a;
-    }}
-    .body-text {{
-      font-size: 14px;
-      margin-bottom: 40px;
-      text-align: justify;
-    }}
-    .metadata-table {{
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-      font-size: 13px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-    }}
-    .metadata-table th, .metadata-table td {{
-      border: 1px solid #e2e8f0;
-      padding: 10px 12px;
-      text-align: left;
-    }}
-    .metadata-table th {{
-      background: #f1f5f9;
-      color: #475569;
-      font-weight: 600;
-      width: 160px;
-    }}
-    .signatures {{
-      display: flex;
-      justify-content: space-between;
-      margin-top: 60px;
-      font-size: 13px;
-    }}
-    .sig-block {{
-      width: 250px;
-      text-align: center;
-    }}
-    .sig-line {{
-      border-top: 1px solid #0f172a;
-      margin-top: 50px;
-      margin-bottom: 6px;
-    }}
-    .sig-name {{
-      font-weight: 600;
-      color: #0f172a;
-    }}
-  </style>
-</head>
-<body>
-  <div class="letterhead">
-    <h1>ACIRP Autonomous Escalation Dispatch</h1>
-    <p>Official Public Grievance Notification Node</p>
-  </div>
-
-  <div class="date-row">
-    Date: {datetime.now().strftime("%d %B, %Y")}<br>
-    Notice Ref: ACIRP-ESC-{incident.id}-{incident.escalation_level}
-  </div>
-
-  <div class="recipient">
-    To,<br>
-    The Office of the {escalation_target},<br>
-    Municipal Administration Division,<br>
-    Bengaluru, Karnataka.
-  </div>
-
-  <div class="subject">
-    SUBJECT: FORMAL COMPLAINT ESCALATION REGARDING UNRESOLVED CIVIC SAFETY HAZARD
-  </div>
-
-  <div class="body-text">
-    Dear Sir/Madam,
-    <br><br>
-    This is an official escalation notice issued automatically by the ACIRP Autonomous Sensing Network on behalf of citizen <strong>{incident.complainant_name}</strong>.
-    <br><br>
-    A civic safety hazard representing a <strong>{incident.issue_type.upper().replace('_', ' ')}</strong> was identified and registered in the municipal database on <strong>{incident.created_at}</strong>. Despite the lapse of the designated Service Level Agreement (SLA) window of <strong>{incident.current_strategy.sla_hours} hours</strong>, the status of this ticket in the municipal portal remains unresolved (Portal Tracking Token: <strong>{incident.official_token or "PENDING"}</strong>).
-    <br><br>
-    Due to the persistent delay in local execution and corresponding safety risks, the case has been officially escalated to your office for immediate review and administrative dispatch.
-
-    <table class="metadata-table">
-      <tr>
-        <th>Incident Reference ID</th>
-        <td style="font-family: monospace;">{incident.id}</td>
-      </tr>
-      <tr>
-        <th>GPS Coordinates</th>
-        <td>Latitude: {incident.latitude}, Longitude: {incident.longitude}</td>
-      </tr>
-      <tr>
-        <th>Visual Confidence</th>
-        <td>{int((incident.confidence or 0.0) * 100)}% (Verified by Gemini Vision Core)</td>
-      </tr>
-      <tr>
-        <th>Severity Level</th>
-        <td style="text-transform: uppercase;">{incident.severity}</td>
-      </tr>
-      <tr>
-        <th>Assigned Department</th>
-        <td>{incident.current_strategy.department}</td>
-      </tr>
-    </table>
-
-    We urge your office to issue immediate directions to the relevant field engineers to clear this hazard and update the municipal database registry.
-
-  </div>
-
-  <div class="signatures">
-    <div class="sig-block">
-      <div class="sig-line"></div>
-      <div class="sig-name">{incident.complainant_name}</div>
-      <div>Complainant (Citizen Filer)</div>
-    </div>
-    <div class="sig-block">
-      <div class="sig-line"></div>
-      <div class="sig-name">ACIRP Agent Node v1.2</div>
-      <div>Autonomous Verification Authority</div>
-    </div>
-  </div>
-</body>
-</html>
-"""
+    res = await legal_petition_generator.generate_petition(
+        incident,
+        escalation_target=escalation_target
+    )
     from fastapi.responses import Response
     return Response(
-        content=html_content,
+        content=res["html_petition"],
         media_type="text/html",
         headers={
-            "Content-Disposition": f"attachment; filename=ACIRP_Escalation_Letter_{incident_id}.html"
+            "Content-Disposition": f"attachment; filename=ACIRP_Escalation_Petition_{incident_id}.html"
         }
     )
+
 
 # ---------------------------------------------------------
 # PARITOK TOKEN-EFFICIENCY API ENDPOINTS

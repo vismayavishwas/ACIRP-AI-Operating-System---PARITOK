@@ -65,4 +65,3 @@ ESCALATION_THRESHOLD = settings.escalation_threshold
 MONITOR_SLEEP_INTERVAL_SEC = settings.monitor_sleep_interval_sec
 MAX_PORTAL_RETRIES = settings.max_portal_retries
 DEFAULT_ROUTING = settings.default_routing
-

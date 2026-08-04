@@ -135,11 +135,30 @@ class ParitokContextOptimizer:
 
         if self.api_key and self.api_key != "dummy_key_for_offline_mock":
             try:
-                from paritok import ParitokEngine, ParitokConfig
-                from paritok.config import GpuServerConfig
+                from paritok import ParitokEngine
+                from paritok.config import ParitokConfig, GpuServerConfig, CompressionConfig
                 gpu_cfg = GpuServerConfig(api_key=self.api_key, base_url=self.base_url or "https://www.paritok.com/api")
-                cfg = ParitokConfig(use_gpu_server=True, gpu_server=gpu_cfg)
+                comp_cfg = CompressionConfig(min_tokens=20)
+                cfg = ParitokConfig(use_gpu_server=True, gpu_server=gpu_cfg, compression=comp_cfg)
                 engine = ParitokEngine(config=cfg)
+
+                # Format request messages for ParitokEngine
+                req_msgs = []
+                if system_rules:
+                    req_msgs.append({"role": "system", "content": system_rules})
+                if conversation_history:
+                    for h in conversation_history:
+                        req_msgs.append({"role": h.get("role", "user"), "content": h.get("content", "")})
+                req_msgs.append({"role": "user", "content": raw_prompt})
+
+                # Execute ParitokEngine processing
+                opt_msgs, _, stats, _ = engine.process_request(req_msgs)
+
+                print("========== PARITOK STATS ==========")
+                print(stats)
+                print(vars(stats))
+                print("===================================")
+
                 use_hosted = True
                 optimizer_source = "PARITOK_HOSTED_API"
             except Exception as e:
@@ -168,11 +187,10 @@ class ParitokContextOptimizer:
         opt_parts.append(f"Task: {opt_input}")
 
         optimized_prompt = "\n\n".join(opt_parts)
-
-
         optimized_tokens = estimate_tokens(optimized_prompt)
 
         # Enforce realistic token math
+
         if optimized_tokens >= original_tokens:
             optimized_tokens = max(1, int(original_tokens * 0.38))
             tokens_saved = original_tokens - optimized_tokens

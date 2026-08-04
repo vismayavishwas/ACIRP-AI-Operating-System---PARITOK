@@ -53,8 +53,8 @@ class PlanningAgent:
             # Format conversation history
             history = [{"role": e.stage.lower(), "content": e.decision} for e in incident.timeline]
 
-
             # Paritok Optimization
+
             raw_prompt = f"Determine optimal municipal routing for {incident.issue_type} at GPS ({incident.latitude}, {incident.longitude})."
             system_rules = f"Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry."
             

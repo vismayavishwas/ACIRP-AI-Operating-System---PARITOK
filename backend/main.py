@@ -1003,9 +1003,23 @@ async def get_incident_paritok_metrics(incident_id: str):
         "message": "Paritok metrics pending for this incident."
     }
 
+@app.get("/api/paritok/dashboard")
+async def get_paritok_dashboard_metrics():
+    """
+    Returns real-time Paritok hosted GPU server metrics and session summary.
+    """
+    from agents.paritok_optimizer import paritok_session, PARITOK_API_KEY, PARITOK_BASE_URL
+    summary = paritok_session.get_summary()
+    return {
+        "active_optimizer_source": "PARITOK_HOSTED_API" if PARITOK_API_KEY else "LOCAL_FALLBACK_OPTIMIZER",
+        "paritok_api_key_configured": bool(PARITOK_API_KEY),
+        "paritok_gpu_server_base_url": PARITOK_BASE_URL or "https://www.paritok.com/api",
+        "summary": summary
+    }
+
+
 # ---------------------------------------------------------
 # STATIC FILE SERVING FOR UPLOADED IMAGES
 # ---------------------------------------------------------
 from fastapi.staticfiles import StaticFiles
 app.mount("/static", StaticFiles(directory=UPLOAD_DIR), name="static")
-

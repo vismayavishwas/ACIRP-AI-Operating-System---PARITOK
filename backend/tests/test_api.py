@@ -21,12 +21,12 @@ if hasattr(db, 'db_file'):
     db.db_file = temp_db_path
 
 
-
 client = TestClient(app)
 
 
 @pytest.fixture(autouse=True)
 def clean_database():
+
     with open(temp_db_path, "w") as f:
         f.write("{}")
     yield

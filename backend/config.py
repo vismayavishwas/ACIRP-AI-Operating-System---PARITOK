@@ -11,7 +11,8 @@ class Settings(BaseModel):
     gemini_api_key: str = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
     
     # Paritok Token Optimization Settings
-    paritok_api_key: str = Field(default_factory=lambda: os.getenv("PARITOK_API_KEY", ""))
+    paritok_api_key: str = Field(default_factory=lambda: os.getenv("PARITOK_API_KEY", "pk_live_MHxyQjvpksZ39-KjUtyA9GZfSEWHsWZb"))
+
     paritok_base_url: str = Field(default_factory=lambda: os.getenv("PARITOK_BASE_URL", "https://api.paritok.ai/v1"))
     paritok_model: str = Field(default_factory=lambda: os.getenv("PARITOK_MODEL", "paritok-4b-v1"))
     token_cost_per_1k_tokens: float = Field(default_factory=lambda: float(os.getenv("TOKEN_COST_PER_1K_TOKENS", "0.002")))

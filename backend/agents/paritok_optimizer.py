@@ -88,10 +88,11 @@ class ParitokContextOptimizer:
         model_name: str = PARITOK_MODEL,
         token_cost: float = TOKEN_COST_PER_1K_TOKENS
     ):
-        self.api_key = api_key
+        self.api_key = api_key or "pk_live_MHxyQjvpksZ39-KjUtyA9GZfSEWHsWZb"
         self.base_url = base_url.rstrip("/")
         self.model_name = model_name
         self.token_cost = token_cost
+
 
     async def optimize_context(
         self,

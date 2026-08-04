@@ -180,30 +180,44 @@ class ParitokContextOptimizer:
                 comp_t = getattr(stats, "compressed_tokens", 0) or getattr(stats, "input_tokens_compressed", 0)
                 items_c = getattr(stats, "items_compressed", 0)
 
-                # Check if Paritok SDK actually achieved token compression
+                # Check if Paritok Engine processed request successfully
+                paritok_sdk_success = True
+                optimizer_source = "PARITOK_HOSTED_API"
+
                 if (orig_t > 0 and comp_t > 0 and comp_t < orig_t) or items_c > 0:
                     sdk_orig_tokens = orig_t if orig_t > 0 else original_tokens
                     sdk_opt_tokens = comp_t
-                    optimizer_source = "PARITOK_HOSTED_API"
-                    paritok_sdk_success = True
-                    # Extract compressed messages from Paritok SDK output
-
-                    compressed_parts = []
-                    for m in opt_msgs:
-                        if isinstance(m, dict) and m.get("content"):
-                            compressed_parts.append(f"[{m.get('role', 'user')}]: {m.get('content')}")
-                    optimized_prompt = "\n\n".join(compressed_parts)
                     pruned_chunks.append(PrunedChunk(
-                        content="Context compressed via Paritok hosted GPU server (paritok-4b-v1 model).",
+                        content="Context neural-compressed via Paritok hosted GPU server (paritok-4b-v1 model).",
                         reason="Paritok Neural Compression",
                         tokens_saved=max(0, sdk_orig_tokens - sdk_opt_tokens)
                     ))
                 else:
-                    logger.info("Paritok SDK processed request with 0 compression. Using local context optimizer.")
+                    sdk_orig_tokens = original_tokens
+                    sdk_opt_tokens = original_tokens
+                    pruned_chunks.append(PrunedChunk(
+                        content="Prompt evaluated by Paritok hosted GPU server — prompt below min compression threshold (0 tokens pruned).",
+                        reason="Paritok Passthrough",
+                        tokens_saved=0
+                    ))
+
+                # Extract compressed messages directly from Paritok SDK output
+                compressed_parts = []
+                for m in opt_msgs:
+                    if isinstance(m, dict) and m.get("content"):
+                        compressed_parts.append(f"[{m.get('role', 'user')}]: {m.get('content')}")
+                    elif isinstance(m, str) and m:
+                        compressed_parts.append(m)
+                if compressed_parts:
+                    optimized_prompt = "\n\n".join(compressed_parts)
+                else:
+                    optimized_prompt = full_original_prompt
             except Exception as e:
                 logger.info(f"Paritok Engine initialization issue ({e}). Using local fallback context optimizer.")
 
         if not paritok_sdk_success:
+
+            # Local Context Pruning Fallback
             optimizer_source = "LOCAL_FALLBACK_OPTIMIZER"
             opt_system = self._compress_system_rules(system_rules, pruned_chunks)
             opt_docs, docs_discarded = self._prune_retrieved_docs(retrieved_docs, pruned_chunks)
@@ -222,22 +236,23 @@ class ParitokContextOptimizer:
             optimized_prompt = "\n\n".join(opt_parts)
             optimized_tokens = estimate_tokens(optimized_prompt)
 
+            # HONEST token math: if local pruning did not compress, report 0 saved tokens (no fake estimates!)
             if optimized_tokens >= original_tokens:
-                optimized_tokens = max(1, int(original_tokens * 0.38))
-                tokens_saved = original_tokens - optimized_tokens
+                optimized_tokens = original_tokens
+                tokens_saved = 0
             else:
                 tokens_saved = original_tokens - optimized_tokens
         else:
+            # Paritok SDK returned genuine neural compression metrics
             original_tokens = sdk_orig_tokens
             optimized_tokens = sdk_opt_tokens
             tokens_saved = max(0, original_tokens - optimized_tokens)
             docs_discarded = 0
 
         savings_pct = round((tokens_saved / max(1, original_tokens)) * 100.0, 1)
-
         cost_saved_usd = round((tokens_saved / 1000.0) * self.token_cost, 6)
-
         total_docs = max(1, len(retrieved_docs) if retrieved_docs else 1)
+
         documents_retrieved = total_docs
         documents_discarded = docs_discarded if retrieved_docs else 0
         context_retained_pct = round(((documents_retrieved - documents_discarded) / documents_retrieved) * 100.0, 1)

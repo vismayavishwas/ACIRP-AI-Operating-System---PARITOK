@@ -438,7 +438,6 @@ function BeforeAfterPromptInspector({ metrics }) {
 // ---------------------------------------------------------
 
 function CumulativeParitokMetricsTable({ incidents = [] }) {
-
   const [dashboardData, setDashboardData] = useState(null);
 
   useEffect(() => {
@@ -460,194 +459,81 @@ function CumulativeParitokMetricsTable({ incidents = [] }) {
   }, []);
 
   const summary = dashboardData?.summary;
-  const trials = [];
 
-  if (summary && summary.request_history && summary.request_history.length > 0) {
-    summary.request_history.forEach((req, idx) => {
-      trials.push({
-        trialNo: idx + 1,
-        id: req.request_id || `req_${idx + 1}`,
-        stepName: req.request_type || "Agentic Trajectory Optimization",
-        originalTokens: req.original_tokens || 0,
-        optimizedTokens: req.optimized_tokens || 0,
-        tokensSaved: req.tokens_saved || 0,
-        efficiencyPct: req.savings_percentage || 0,
-        costSavedUsd: req.cost_saved_usd || 0.0,
-        efficiencyScore: req.efficiency_score || 85,
-        source: req.optimizer_source || "PARITOK_HOSTED_API",
-        timestamp: req.timestamp || ""
-      });
-    });
-  } else {
-    incidents.forEach((inc, idx) => {
-      let metrics = inc.paritok_metrics;
-      if (!metrics && inc.timeline) {
-        const evtWithMetrics = inc.timeline.find(e => e.paritok_metrics);
-        if (evtWithMetrics) {
-          metrics = evtWithMetrics.paritok_metrics;
-        }
-      }
-
-      if (metrics && metrics.original_tokens) {
-        trials.push({
-          trialNo: trials.length + 1,
-          id: inc.id,
-          stepName: inc.issue_type ? `Jurisdictional Strategy (${inc.issue_type})` : "Agentic Trajectory Optimization",
-          originalTokens: metrics.original_tokens,
-          optimizedTokens: metrics.optimized_tokens,
-          tokensSaved: metrics.tokens_saved,
-          efficiencyPct: metrics.savings_percentage,
-          costSavedUsd: metrics.cost_saved_usd || 0.0,
-          efficiencyScore: metrics.efficiency_score || 90,
-          source: metrics.optimizer_source || "PARITOK_HOSTED_API",
-          timestamp: ""
-        });
-      }
-    });
-  }
-
-  const totalRequests = summary && summary.total_requests !== undefined ? summary.total_requests : trials.length;
-  const totalOriginal = summary && summary.total_original_tokens ? summary.total_original_tokens : trials.reduce((acc, t) => acc + t.originalTokens, 0);
-  const totalOptimized = summary && summary.total_optimized_tokens ? summary.total_optimized_tokens : trials.reduce((acc, t) => acc + t.optimizedTokens, 0);
-  const totalSaved = summary && summary.total_tokens_saved !== undefined ? summary.total_tokens_saved : trials.reduce((acc, t) => acc + t.tokensSaved, 0);
-  const totalCostUsd = summary && summary.total_cost_saved_usd !== undefined ? summary.total_cost_saved_usd : trials.reduce((acc, t) => acc + t.costSavedUsd, 0);
-  const cumulativeEfficiency = summary && summary.average_savings_pct !== undefined ? summary.average_savings_pct.toFixed(1) : (totalOriginal > 0 ? (((totalOriginal - totalOptimized) / totalOriginal) * 100).toFixed(1) : "0.0");
-  const isParitokHosted = dashboardData?.active_optimizer_source === "PARITOK_HOSTED_API" || trials.length === 0 || trials.some(t => t.source === "PARITOK_HOSTED_API");
+  const totalRequests = summary && summary.total_requests !== undefined ? summary.total_requests : 0;
+  const totalSaved = summary && summary.total_tokens_saved !== undefined ? summary.total_tokens_saved : 0;
+  const totalCostUsd = summary && summary.total_cost_saved_usd !== undefined ? summary.total_cost_saved_usd : 0.0;
+  const isParitokHosted = dashboardData?.active_optimizer_source === "PARITOK_HOSTED_API";
 
   return (
     <div className="bg-[#10172E]/90 border border-cyan-500/30 rounded-2xl p-5 my-6 backdrop-blur-md shadow-2xl text-left">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-white/10">
         <div>
           <div className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-cyan-400 fill-cyan-400/20" />
             <h3 className="font-outfit font-extrabold text-base text-slate-100 uppercase tracking-wide">
-              Paritok Hosted GPU Token Optimization Registry
+              Paritok Hosted GPU Token Optimization Panel
             </h3>
           </div>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Real-time trajectory compression metrics starting from deployment (0 baseline)
+            Live in-memory session compression metrics starting from deployment (0 baseline)
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono font-bold">
           <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
             <Sparkles className="h-4 w-4 text-emerald-400" />
-            <span>Optimization Source: <strong className="text-emerald-400 text-xs">{isParitokHosted ? "PARITOK_HOSTED_API" : "FALLBACK"}</strong></span>
+            <span>Optimization Source: <strong className="text-emerald-400 text-xs">{isParitokHosted ? "PARITOK_HOSTED_API" : "LOCAL_FALLBACK_OPTIMIZER"}</strong></span>
           </div>
         </div>
       </div>
 
-      {/* Two Small Dynamic Summary Cards Starting From Zero */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-        {/* Small Box 1: Requests Sent */}
-        <div className="bg-slate-950/70 border border-cyan-500/30 p-4 rounded-xl flex items-center justify-between shadow-lg">
+      {/* Two Compact Dashboard Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Card 1 – Session Statistics */}
+        <div className="bg-slate-950/75 border border-cyan-500/30 p-5 rounded-xl flex items-center justify-between shadow-xl">
           <div>
-            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold">Requests Sent</div>
-            <div className="text-2xl font-extrabold font-mono text-cyan-400 mt-1">
-              {totalRequests} <span className="text-xs font-normal text-slate-400">(Live Requests Processed)</span>
+            <div className="text-[11px] font-mono text-cyan-400 uppercase tracking-wider font-extrabold mb-1">
+              Card 1 – Session Statistics
+            </div>
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wide font-semibold mt-2">
+              Requests Processed
+            </div>
+            <div className="text-3xl font-extrabold font-mono text-cyan-300 mt-1">
+              {totalRequests}
             </div>
           </div>
-          <div className="bg-cyan-500/10 border border-cyan-500/20 p-3 rounded-xl text-cyan-400">
-            <Radio className="h-6 w-6" />
+          <div className="bg-cyan-500/10 border border-cyan-500/20 p-3.5 rounded-xl text-cyan-400">
+            <Radio className="h-7 w-7" />
           </div>
         </div>
 
-        {/* Small Box 2: Tokens Saved & Money Saved */}
-        <div className="bg-slate-950/70 border border-emerald-500/30 p-4 rounded-xl flex items-center justify-between shadow-lg">
+        {/* Card 2 – Paritok Savings */}
+        <div className="bg-slate-950/75 border border-emerald-500/30 p-5 rounded-xl flex items-center justify-between shadow-xl">
           <div>
-            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold">Paritok Savings Cumulative Summary</div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1.5 font-mono">
+            <div className="text-[11px] font-mono text-emerald-400 uppercase tracking-wider font-extrabold mb-1">
+              Card 2 – Paritok Savings
+            </div>
+            <div className="flex flex-col gap-2 mt-2 font-mono">
               <div className="text-xs text-slate-300">
-                tokens saved so far: <strong className="text-emerald-400 text-sm font-extrabold">⚡ {totalSaved.toLocaleString()} tokens</strong>
+                Tokens Saved So Far: <strong className="text-emerald-400 text-lg font-extrabold ml-1">⚡ {totalSaved.toLocaleString()}</strong>
               </div>
-              <div className="text-xs text-slate-300 border-t sm:border-t-0 sm:border-l border-white/10 pt-1 sm:pt-0 sm:pl-3">
-                money saved so far: <strong className="text-amber-300 text-sm font-extrabold">${typeof totalCostUsd === "number" ? totalCostUsd.toFixed(6) : totalCostUsd}</strong>
+              <div className="text-xs text-slate-300">
+                Estimated Cost Saved: <strong className="text-amber-300 text-base font-extrabold ml-1">${typeof totalCostUsd === "number" ? totalCostUsd.toFixed(6) : totalCostUsd}</strong>
               </div>
             </div>
           </div>
-          <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl text-emerald-400">
-            <Sparkles className="h-6 w-6" />
+          <div className="bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-xl text-emerald-400">
+            <Sparkles className="h-7 w-7" />
           </div>
         </div>
-      </div>
-
-
-      {/* ONE Single Unified Graceful Table */}
-      <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-950/40">
-        <table className="w-full text-left text-xs font-sans">
-          <thead className="bg-slate-900/90 text-slate-400 uppercase text-[10px] font-mono border-b border-white/10">
-            <tr>
-              <th className="py-3 px-3.5">Trial & ID</th>
-              <th className="py-3 px-3.5">Agent Trajectory Step</th>
-              <th className="py-3 px-3.5">Token Reduction</th>
-              <th className="py-3 px-3.5">Efficiency & Cost</th>
-              <th className="py-3 px-3.5">Optimization Graceful Summary</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5 text-slate-300">
-            {trials.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="py-6 text-center text-slate-500 font-mono text-xs">
-                  No active agent trajectories processed yet. Upload an incident in Citizen Terminal to see live token savings accumulate!
-                </td>
-              </tr>
-            ) : (
-              trials.map((tr) => (
-                <tr key={tr.id} className="hover:bg-cyan-500/5 transition">
-                  <td className="py-3 px-3.5 font-mono">
-                    <span className="font-bold text-cyan-400">#{tr.trialNo}</span>
-                    <div className="text-[10px] text-slate-400 font-bold">{tr.id}</div>
-                  </td>
-                  <td className="py-3 px-3.5 font-medium text-slate-200">
-                    <div className="flex items-center gap-1.5 font-bold text-xs text-indigo-300">
-                      <span>{tr.stepName}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-3.5 font-mono">
-                    <div className="text-slate-300">
-                      <span className="text-rose-300 line-through">{tr.originalTokens}</span> ➔ <span className="text-cyan-300 font-bold">{tr.optimizedTokens}</span> tokens
-                    </div>
-                    <div className="text-emerald-400 font-extrabold text-xs mt-0.5">
-                      ⚡ -{tr.tokensSaved} tokens saved
-                    </div>
-                  </td>
-                  <td className="py-3 px-3.5 font-mono">
-                    <span className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold">
-                      {tr.efficiencyPct}% saved
-                    </span>
-                    <div className="text-amber-300 font-bold text-[11px] mt-1">
-                      ${typeof tr.costSavedUsd === "number" ? tr.costSavedUsd.toFixed(5) : tr.costSavedUsd} saved
-                    </div>
-                  </td>
-                  <td className="py-3 px-3.5 text-xs text-slate-300 leading-relaxed font-sans">
-                    Paritok compressed raw prompt payload from <strong>{tr.originalTokens} tokens</strong> down to <strong>{tr.optimizedTokens} tokens</strong>, preserving key agent decision facts while achieving a <strong>{tr.efficiencyPct}% token reduction</strong>.
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-          <tfoot className="bg-slate-900/90 font-mono font-bold border-t border-white/10 text-white">
-            <tr>
-              <td colSpan="2" className="py-3.5 px-3.5 uppercase text-cyan-300 text-xs">
-                Cumulative Trajectory Total ({trials.length} Steps Processed)
-              </td>
-              <td className="py-3.5 px-3.5 text-emerald-400 text-sm">
-                ⚡ -{totalSaved.toLocaleString()} tokens saved
-              </td>
-              <td className="py-3.5 px-3.5 text-amber-300 text-xs">
-                ${typeof totalCostUsd === "number" ? totalCostUsd.toFixed(5) : totalCostUsd} total saved
-              </td>
-              <td className="py-3.5 px-3.5 text-slate-300 text-xs">
-                Average compression efficiency: <strong className="text-emerald-400">{cumulativeEfficiency}% token reduction</strong> across all active runs.
-              </td>
-            </tr>
-          </tfoot>
-        </table>
       </div>
     </div>
   );
 }
+
+
 
 export default function App() {
   const [incidents, setIncidents] = useState([]);

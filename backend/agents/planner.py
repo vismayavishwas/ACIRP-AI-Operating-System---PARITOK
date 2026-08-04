@@ -68,15 +68,12 @@ class PlanningAgent:
             ])
 
             # Format conversation history
-
             history = [{"role": e.stage.lower(), "content": e.decision} for e in incident.timeline]
 
             # Paritok Optimization
-
             raw_prompt = f"Determine optimal municipal routing for {incident.issue_type} at GPS ({incident.latitude}, {incident.longitude})."
             system_rules = "Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry."
             _, paritok_metrics = await self.paritok.optimize_context(
-
                 raw_prompt=raw_prompt,
                 system_rules=system_rules,
                 retrieved_docs=retrieved_docs,
@@ -85,6 +82,7 @@ class PlanningAgent:
             )
 
             # If we found resolved incidents nearby, check if they used a customized or faster route
+
             if nearby_resolved:
                 fastest_inc = min(
                     nearby_resolved, key=lambda x: x.current_strategy.sla_hours if x.current_strategy else 999)

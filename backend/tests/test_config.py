@@ -1,3 +1,4 @@
+import config
 import os
 import importlib
 import sys
@@ -5,7 +6,6 @@ import sys
 # Ensure the parent directory is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import config
 
 def test_config_defaults():
     # Test settings are loaded with correct defaults
@@ -19,16 +19,17 @@ def test_config_defaults():
     assert "pothole" in settings.default_routing
     assert "fallen_tree" in settings.default_routing
 
+
 def test_config_env_override(monkeypatch):
     # Test setting overrides via environment variables
     monkeypatch.setenv("GEMINI_API_KEY", "test-key-123")
     monkeypatch.setenv("PHOTO_CONFIDENCE_THRESHOLD", "0.95")
-    
+
     # Reload settings/config under mock env
     importlib.reload(config)
-    
+
     assert config.settings.gemini_api_key == "test-key-123"
-    
+
     # Clean up reload to reset normal module state
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("PHOTO_CONFIDENCE_THRESHOLD", raising=False)

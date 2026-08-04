@@ -18,12 +18,13 @@ try:
 except ImportError:
     HAS_FIREBASE = False
 
+
 class FirebaseDatabase(BaseDatabase):
     def __init__(self):
         self.apps = {}
         self.db_clients = {}
         self.buckets = {}
-        
+
         if not HAS_FIREBASE:
             logger.warning("firebase-admin package not installed. FirebaseDatabase is disabled.")
             return
@@ -34,7 +35,7 @@ class FirebaseDatabase(BaseDatabase):
             try:
                 proj_id = os.getenv("FIREBASE_PROJECT_ID") or google_cred.project_id
                 bucket_name = os.getenv("FIREBASE_STORAGE_BUCKET") or f"{proj_id}.appspot.com"
-                
+
                 # Check if default app is already initialized
                 if not firebase_admin._apps:
                     app = firebase_admin.initialize_app(google_cred, {
@@ -42,7 +43,7 @@ class FirebaseDatabase(BaseDatabase):
                     })
                 else:
                     app = firebase_admin.get_app()
-                
+
                 self.apps["google"] = app
                 self.db_clients["google"] = firestore.client(app=app)
                 self.buckets["google"] = storage.bucket(app=app)
@@ -56,12 +57,12 @@ class FirebaseDatabase(BaseDatabase):
             try:
                 proj_id = os.getenv("FIREBASE_PROJECT_ID_UNSTOP") or unstop_cred.project_id
                 bucket_name = f"{proj_id}.appspot.com"
-                
+
                 # Use a named app for Unstop to avoid name collision
                 app = firebase_admin.initialize_app(unstop_cred, {
                     'storageBucket': bucket_name
                 }, name="unstop")
-                
+
                 self.apps["unstop"] = app
                 self.db_clients["unstop"] = firestore.client(app=app)
                 self.buckets["unstop"] = storage.bucket(app=app)
@@ -154,6 +155,6 @@ class FirebaseDatabase(BaseDatabase):
         dphi = math.radians(lat2 - lat1)
         dlambda = math.radians(lon2 - lon1)
 
-        a = math.sin(dphi/2.0)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda/2.0)**2
+        a = math.sin(dphi / 2.0)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0)**2
         c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
         return R * c

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 from models import Incident
 
+
 class BaseDatabase(ABC):
     @abstractmethod
     def get_incident(self, incident_id: str) -> Optional[Incident]:

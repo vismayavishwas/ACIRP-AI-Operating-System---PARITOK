@@ -1,6 +1,7 @@
 import asyncio
 import httpx
 
+
 async def main():
     urls = [
         "https://api.paritok.com/v1/chat/completions",

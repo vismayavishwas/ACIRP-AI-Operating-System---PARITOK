@@ -8,6 +8,7 @@ from db.base import BaseDatabase
 # Target incidents_db.json in parent directory (backend/)
 DB_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "incidents_db.json")
 
+
 class JSONDatabase(BaseDatabase):
     def __init__(self, db_file_override: Optional[str] = None):
         self.db_file = db_file_override or DB_FILE
@@ -61,6 +62,6 @@ class JSONDatabase(BaseDatabase):
         dphi = math.radians(lat2 - lat1)
         dlambda = math.radians(lon2 - lon1)
 
-        a = math.sin(dphi/2.0)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda/2.0)**2
+        a = math.sin(dphi / 2.0)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0)**2
         c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
         return R * c

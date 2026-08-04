@@ -1,15 +1,16 @@
-import os
 import re
 import math
 import logging
-import httpx
+
 from datetime import datetime
 from typing import List, Dict, Any, Tuple, Optional
+
 from models import ParitokMetrics, PrunedChunk
 
 from config import PARITOK_API_KEY, PARITOK_BASE_URL, PARITOK_MODEL, TOKEN_COST_PER_1K_TOKENS
 
 logger = logging.getLogger("acirp.paritok_optimizer")
+
 
 def estimate_tokens(text: str) -> int:
     """
@@ -25,10 +26,12 @@ def estimate_tokens(text: str) -> int:
     estimated = max(1, math.ceil((len(words) * 1.3 + chars / 4.0) / 2.0))
     return estimated
 
+
 class GlobalParitokSession:
     """
     Global session tracking for cumulative Paritok token metrics across API requests.
     """
+
     def __init__(self):
         self.total_original_tokens: int = 0
         self.total_optimized_tokens: int = 0
@@ -60,7 +63,8 @@ class GlobalParitokSession:
         })
 
     def get_summary(self) -> Dict[str, Any]:
-        avg_savings = round((self.total_tokens_saved / max(1, self.total_original_tokens)) * 100.0, 1) if self.total_original_tokens > 0 else 0.0
+        avg_savings = round((self.total_tokens_saved / max(1, self.total_original_tokens))
+                            * 100.0, 1) if self.total_original_tokens > 0 else 0.0
         return {
             "total_original_tokens": self.total_original_tokens,
             "total_optimized_tokens": self.total_optimized_tokens,
@@ -81,6 +85,7 @@ class ParitokContextOptimizer:
     Sits between Context Retrieval / Raw History and LLM generation.
     Checks connection to Paritok hosted GPU server, or executes local semantic context pruning.
     """
+
     def __init__(
         self,
         api_key: str = PARITOK_API_KEY,
@@ -119,7 +124,7 @@ class ParitokContextOptimizer:
         if retrieved_docs:
             unoptimized_parts.append("--- RETRIEVED INCIDENT HISTORY & DOCUMENTS ---")
             for idx, doc in enumerate(retrieved_docs):
-                unoptimized_parts.append(f"Doc #{idx+1}: {doc}")
+                unoptimized_parts.append(f"Doc #{idx + 1}: {doc}")
         if conversation_history:
             unoptimized_parts.append("--- CONVERSATION MEMORY ---")
             for msg in conversation_history:
@@ -182,7 +187,8 @@ class ParitokContextOptimizer:
         if opt_system:
             opt_parts.append(f"System: {opt_system}")
         if opt_docs:
-            opt_parts.append(f"Relevant Context:\n" + "\n".join(opt_docs))
+            opt_parts.append("Relevant Context:\n" + "\n".join(opt_docs))
+
         if opt_history:
             opt_parts.append("Memory:\n" + "\n".join(opt_history))
         opt_parts.append(f"Task: {opt_input}")

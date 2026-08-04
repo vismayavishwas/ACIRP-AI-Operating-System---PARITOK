@@ -1,11 +1,15 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Literal, Dict, Any
+from typing import List, Optional, Literal
+
 from datetime import datetime
+
 
 class PrunedChunk(BaseModel):
     content: str
-    reason: str  # e.g., "Duplicate timeline event", "Low relevance (<0.30)", "Outdated ticket log", "Repeated system prompt metadata"
+    # e.g., "Duplicate timeline event", "Low relevance (<0.30)", "Outdated ticket log", "Repeated system prompt metadata"
+    reason: str
     tokens_saved: int
+
 
 class ParitokMetrics(BaseModel):
     original_tokens: int
@@ -23,6 +27,7 @@ class ParitokMetrics(BaseModel):
     original_prompt: Optional[str] = None
     optimized_prompt: Optional[str] = None
 
+
 class TimelineEvent(BaseModel):
     timestamp: str
     stage: Literal["PERCEPTION", "PLANNER", "TOOL", "MONITOR", "VERIFY", "ESCALATION", "SYSTEM"]
@@ -32,11 +37,13 @@ class TimelineEvent(BaseModel):
     next_action: str
     paritok_metrics: Optional[ParitokMetrics] = None
 
+
 class Strategy(BaseModel):
     name: str
     department: str
     sla_hours: int
     escalation_path: List[str]
+
 
 class PlannerDecision(BaseModel):
     goal: str
@@ -48,10 +55,11 @@ class PlannerDecision(BaseModel):
     confidence: float
     paritok_metrics: Optional[ParitokMetrics] = None
 
+
 class Incident(BaseModel):
     id: str
     status: Literal[
-        "DETECTED", "AWAITING_REUPLOAD", "PLANNED", "SUBMITTED", 
+        "DETECTED", "AWAITING_REUPLOAD", "PLANNED", "SUBMITTED",
         "MONITORING", "VERIFYING", "ESCALATED", "CLOSED"
     ]
     goal: str = ""

@@ -11,6 +11,7 @@ from agents.paritok_optimizer import ParitokContextOptimizer
 
 logger = logging.getLogger("acirp.verification")
 
+
 class VerificationAgent:
     def __init__(self, api_key: str):
         key = api_key or "dummy_key_for_offline_mock"
@@ -19,7 +20,9 @@ class VerificationAgent:
 
     async def verify(self, before_bytes: bytes, after_bytes: bytes, incident: Incident, before_mime: str = "image/jpeg", after_mime: str = "image/jpeg", filename: str = "") -> Incident:
         raw_prompt = f"Verify civic resolution for incident {incident.id} ({incident.issue_type}). Proof filename: '{filename}'."
-        system_rules = f"""
+        system_rules = """
+
+
         Compare these before and after images of a civic issue.
         Before Image: Shows a civic hazard (e.g. garbage pile, pothole, fallen tree).
         After Image: Shows the repaired or cleared state.
@@ -34,7 +37,7 @@ class VerificationAgent:
             system_rules=system_rules,
             request_type="Visual Verification Reasoning"
         )
-        
+
         class VerificationResult(BaseModel):
             is_resolved: bool
             confidence: float = Field(description="Score between 0.0 and 1.0")
@@ -58,9 +61,10 @@ class VerificationAgent:
             err_type = type(e).__name__
             err_str = str(e)
             logger.warning(f"Verification API Exception ({err_type}): {err_str}. Activating intelligent failover mock.")
-            
+
             name_lower = filename.lower()
-            hazard_keywords = ["garbage", "pothole", "tree", "before", "hazard", "wrong", "fail", "bad", "unresolved", "error"]
+            hazard_keywords = ["garbage", "pothole", "tree", "before",
+                               "hazard", "wrong", "fail", "bad", "unresolved", "error"]
             if any(kw in name_lower for kw in hazard_keywords):
                 is_resolved = False
                 confidence = 0.30
@@ -69,7 +73,7 @@ class VerificationAgent:
                 is_resolved = True
                 confidence = 0.95
                 justification = f"Failover Verification Mock: Proof verified RESOLVED successfully ({err_type}: {err_str[:30]}...)"
-                
+
             result = {
                 "is_resolved": is_resolved,
                 "confidence": confidence,
@@ -78,7 +82,7 @@ class VerificationAgent:
 
         conf_percent = f"{int(result['confidence'] * 100)}%"
         is_verified = result["is_resolved"] and result["confidence"] >= VERIFICATION_THRESHOLD
-        
+
         if is_verified:
             next_action_step = "Close incident ticket as successfully resolved."
             incident.status = "CLOSED"
@@ -90,7 +94,7 @@ class VerificationAgent:
             else:
                 next_action_step = "Escalate ticket to higher authority for review."
                 incident.status = "ESCALATED"
-            
+
         event = TimelineEvent(
             timestamp=datetime.now().strftime("%d %b %H:%M"),
             stage="VERIFY",
@@ -100,7 +104,7 @@ class VerificationAgent:
             next_action=next_action_step,
             paritok_metrics=paritok_metrics
         )
-        
+
         incident.timeline.append(event)
         incident.paritok_metrics = paritok_metrics
         incident.updated_at = datetime.now().isoformat()

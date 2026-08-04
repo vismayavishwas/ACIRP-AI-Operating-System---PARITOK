@@ -1,3 +1,6 @@
+from models import Incident, TimelineEvent
+from main import app, db, perception_agent, verification_agent
+from fastapi.testclient import TestClient
 import os
 import sys
 import tempfile
@@ -12,14 +15,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 temp_db_fd, temp_db_path = tempfile.mkstemp(suffix="_integration_test_db.json")
 os.close(temp_db_fd)
 
-import db.json_db
-db.json_db.DB_FILE = temp_db_path
+if hasattr(db, 'db_file'):
+    db.db_file = temp_db_path
 
-from fastapi.testclient import TestClient
-from main import app, db, perception_agent, verification_agent
-from models import Incident, TimelineEvent
+
 
 client = TestClient(app)
+
 
 @pytest.fixture(autouse=True)
 def clean_database():
@@ -29,6 +31,7 @@ def clean_database():
     if os.path.exists(temp_db_path):
         with open(temp_db_path, "w") as f:
             f.write("{}")
+
 
 def test_full_incident_lifecycle_and_sla_breach_flow():
     """
@@ -59,8 +62,8 @@ def test_full_incident_lifecycle_and_sla_breach_flow():
 
     # 1. Citizen Uploads Photo
     with patch.object(db, 'upload_image', return_value="/static/inc_lifecycle_1_before.jpg"), \
-         patch.object(perception_agent, 'analyze', return_value=dummy_detected):
-        
+            patch.object(perception_agent, 'analyze', return_value=dummy_detected):
+
         files = {"image": ("pothole.jpg", b"pothole-image-bytes", "image/jpeg")}
         data = {"latitude": 12.9716, "longitude": 77.5946, "complainant_name": "Alice Citizen"}
         res = client.post("/api/incidents/submit", data=data, files=files)
@@ -105,6 +108,7 @@ def test_full_incident_lifecycle_and_sla_breach_flow():
     assert approved_inc.escalation_level == 1
     assert approved_inc.status == "MONITORING"
 
+
 def test_portal_crash_simulation_workflow():
     """
     Integration Test:
@@ -129,6 +133,7 @@ def test_portal_crash_simulation_workflow():
     assert updated.status == "CLOSED"
     last_event = updated.timeline[-1]
     assert last_event.decision == "Portal submission failed"
+
 
 def test_verification_hazard_rejection_guardrail():
     """
@@ -168,9 +173,9 @@ def test_verification_hazard_rejection_guardrail():
     )
 
     with patch.object(db, 'upload_image', return_value="http://example.com/garbage_after.jpg"), \
-         patch("os.listdir", return_value=["inc_verify_fail_before.jpg"]), \
-         patch("main.open", mock_open(read_data=b"garbage-before-bytes")), \
-         patch.object(verification_agent, 'verify', return_value=failed_verification_incident):
+            patch("os.listdir", return_value=["inc_verify_fail_before.jpg"]), \
+            patch("main.open", mock_open(read_data=b"garbage-before-bytes")), \
+            patch.object(verification_agent, 'verify', return_value=failed_verification_incident):
 
         files = {"image": ("garbage_still_here.jpg", b"garbage-bytes", "image/jpeg")}
         res = client.post("/api/incidents/inc_verify_fail/verify-resolution", files=files)
@@ -178,6 +183,7 @@ def test_verification_hazard_rejection_guardrail():
         data = res.json()
         assert data["status"] == "ESCALATED"
         assert data["timeline"][-1]["decision"] == "Verification failed"
+
 
 def test_download_escalation_letter_and_petition_forms():
     """
@@ -206,6 +212,7 @@ def test_download_escalation_letter_and_petition_forms():
     letter_res = client.get("/api/incidents/inc_download_test/download-escalation-letter")
     assert letter_res.status_code == 200
     assert "FORMAL COMPLAINT ESCALATION" in letter_res.text
+
 
 @pytest.fixture(scope="session", autouse=True)
 def cleanup_temp_db():

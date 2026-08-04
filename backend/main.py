@@ -1,13 +1,17 @@
+from fastapi.staticfiles import StaticFiles
+from agents.paritok_optimizer import ParitokContextOptimizer, paritok_session
+from pydantic import BaseModel as FastAPIModel
 import os
 import uuid
 import logging
 from datetime import datetime, timedelta
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, Request
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from typing import List, Optional
 
-from models import Incident, TimelineEvent, PlannerDecision, Strategy
+from models import Incident, TimelineEvent, PlannerDecision
+
 from db.factory import get_db
 from db.firebase_db import comp_id_context
 from config import GEMINI_API_KEY
@@ -29,6 +33,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.middleware("http")
 async def add_competition_context(request: Request, call_next):
@@ -58,6 +63,7 @@ MOCK_PORTAL_TICKETS = {}
 # 1. CORE CITIZEN PORTAL ENDPOINTS
 # ---------------------------------------------------------
 
+
 @app.post("/api/incidents/submit")
 async def create_incident(
     latitude: float = Form(...),
@@ -70,19 +76,19 @@ async def create_incident(
     Generates incident document, saves image, runs Perception Agent.
     """
     incident_id = f"inc_{uuid.uuid4().hex[:8]}"
-    
+
     # Save the uploaded file
     file_ext = image.filename.split(".")[-1]
     image_bytes = await image.read()
-    
+
     # Try to upload to Firebase Storage
     firebase_url = db.upload_image(image_bytes, f"{incident_id}_before.{file_ext}", image.content_type or "image/jpeg")
-    
+
     # Save a local backup copy
     image_path = os.path.join(UPLOAD_DIR, f"{incident_id}_before.{file_ext}")
     with open(image_path, "wb") as f:
         f.write(image_bytes)
-        
+
     # Initialize basic incident state
     incident = Incident(
         id=incident_id,
@@ -92,7 +98,7 @@ async def create_incident(
         longitude=longitude,
         image_before_url=firebase_url if firebase_url else f"/static/{incident_id}_before.{file_ext}"
     )
-    
+
     # Append initial detection event
     incident.timeline.append(TimelineEvent(
         timestamp=datetime.now().strftime("%d %b %H:%M"),
@@ -109,6 +115,7 @@ async def create_incident(
     db.save_incident(incident)
     return incident
 
+
 @app.post("/api/incidents/{incident_id}/verify-resolution")
 async def verify_incident_resolution(
     incident_id: str,
@@ -121,23 +128,24 @@ async def verify_incident_resolution(
     incident = db.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-        
+
     if incident.status != "VERIFYING":
         raise HTTPException(status_code=400, detail="Incident is not in verification phase")
 
     # Save resolution file
     file_ext = image.filename.split(".")[-1]
     image_after_bytes = await image.read()
-    
+
     # Try to upload to Firebase Storage
-    firebase_after_url = db.upload_image(image_after_bytes, f"{incident_id}_after.{file_ext}", image.content_type or "image/jpeg")
-    
+    firebase_after_url = db.upload_image(
+        image_after_bytes, f"{incident_id}_after.{file_ext}", image.content_type or "image/jpeg")
+
     image_after_path = os.path.join(UPLOAD_DIR, f"{incident_id}_after.{file_ext}")
     with open(image_after_path, "wb") as f:
         f.write(image_after_bytes)
-        
+
     incident.image_after_url = firebase_after_url if firebase_after_url else f"/static/{incident_id}_after.{file_ext}"
-    
+
     import mimetypes
     # Read the original before image bytes
     local_files = [f for f in os.listdir(UPLOAD_DIR) if f.startswith(f"{incident_id}_before.")]
@@ -161,18 +169,19 @@ async def verify_incident_resolution(
     if not before_mime:
         before_mime = "image/jpeg"
     after_mime = image.content_type or "image/jpeg"
-    
+
     with open(image_before_path, "rb") as f:
         image_before_bytes = f.read()
-        
+
     # Trigger Verification Agent with dynamic MIME types
     incident = await verification_agent.verify(
-        image_before_bytes, image_after_bytes, incident, 
+        image_before_bytes, image_after_bytes, incident,
         before_mime=before_mime, after_mime=after_mime,
         filename=image.filename
     )
     db.save_incident(incident)
     return incident
+
 
 @app.post("/api/incidents/{incident_id}/approve-escalation")
 async def approve_escalation(incident_id: str):
@@ -182,23 +191,23 @@ async def approve_escalation(incident_id: str):
     incident = db.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-        
+
     if incident.status != "ESCALATED":
         raise HTTPException(status_code=400, detail="Incident does not require escalation approval")
-        
+
     incident.escalation_level += 1
     escalation_paths = incident.current_strategy.escalation_path if incident.current_strategy else []
-    
+
     timestamp = datetime.now().strftime("%d %b %H:%M")
-    
+
     if incident.escalation_level <= len(escalation_paths):
         escalation_target = escalation_paths[incident.escalation_level - 1]
-        
+
         # Reset status back to monitoring after escalation action
         incident.status = "MONITORING"
         # Grant a fresh 12h SLA window for escalated authority checks
         incident.sla_deadline = (datetime.now() + timedelta(hours=12)).isoformat()
-        
+
         incident.timeline.append(TimelineEvent(
             timestamp=timestamp,
             stage="ESCALATION",
@@ -222,6 +231,7 @@ async def approve_escalation(incident_id: str):
     db.save_incident(incident)
     return incident
 
+
 @app.post("/api/incidents/{incident_id}/re-upload-image")
 async def re_upload_image(incident_id: str, image: UploadFile = File(...)):
     """
@@ -230,14 +240,14 @@ async def re_upload_image(incident_id: str, image: UploadFile = File(...)):
     incident = db.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-        
+
     if incident.status != "AWAITING_REUPLOAD":
         raise HTTPException(status_code=400, detail="Incident not awaiting photo re-upload")
 
     # Overwrite the original before image
     before_filename = incident.image_before_url.split("/")[-1]
     image_before_path = os.path.join(UPLOAD_DIR, before_filename)
-    
+
     image_bytes = await image.read()
     with open(image_before_path, "wb") as f:
         f.write(image_bytes)
@@ -251,7 +261,7 @@ async def re_upload_image(incident_id: str, image: UploadFile = File(...)):
         reason="Citizen provided higher quality evidence.",
         next_action="Rerunning Perception Agent analysis"
     ))
-    
+
     incident = await perception_agent.analyze(image_bytes, incident, mime_type=image.content_type or "image/jpeg", filename=image.filename)
     db.save_incident(incident)
     return incident
@@ -259,6 +269,7 @@ async def re_upload_image(incident_id: str, image: UploadFile = File(...)):
 # ---------------------------------------------------------
 # 2. AGENT ORCHESTRATOR & SIMULATOR CONTROL ENDPOINTS
 # ---------------------------------------------------------
+
 
 @app.get("/api/incidents/{incident_id}/decision")
 async def get_agent_brain_decision(incident_id: str) -> PlannerDecision:
@@ -270,6 +281,7 @@ async def get_agent_brain_decision(incident_id: str) -> PlannerDecision:
         raise HTTPException(status_code=404, detail="Incident not found")
     return planner_agent.get_brain_decision(incident)
 
+
 @app.get("/api/incidents/{incident_id}")
 async def get_incident(incident_id: str) -> Incident:
     incident = db.get_incident(incident_id)
@@ -277,9 +289,11 @@ async def get_incident(incident_id: str) -> Incident:
         raise HTTPException(status_code=404, detail="Incident not found")
     return incident
 
+
 @app.get("/api/incidents")
 async def list_incidents() -> List[Incident]:
     return db.list_incidents()
+
 
 @app.post("/api/incidents/{incident_id}/tick")
 async def trigger_agent_tick(incident_id: str, mode: str = "api"):
@@ -290,7 +304,7 @@ async def trigger_agent_tick(incident_id: str, mode: str = "api"):
     incident = db.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-        
+
     updated_incident = await planner_agent.execute_step(incident, submission_mode=mode)
     db.save_incident(updated_incident)
     return updated_incident
@@ -298,6 +312,7 @@ async def trigger_agent_tick(incident_id: str, mode: str = "api"):
 # ---------------------------------------------------------
 # 3. MOCK GOVERNMENT PORTAL SYSTEM
 # ---------------------------------------------------------
+
 
 @app.post("/api/mock-portal/submit")
 async def submit_mock_portal_complaint(data: dict):
@@ -307,7 +322,7 @@ async def submit_mock_portal_complaint(data: dict):
     """
     incident_id = data.get("incident_id")
     issue_type = data.get("issue_type")
-    
+
     # Generate unique complaint token
     token = f"BBMP-{uuid.uuid4().hex[:5].upper()}"
     MOCK_PORTAL_TICKETS[token] = {
@@ -318,6 +333,7 @@ async def submit_mock_portal_complaint(data: dict):
     }
     logger.info(f"Mock Portal Ticket Created: {token}")
     return {"status": "success", "complaint_token": token}
+
 
 @app.get("/api/mock-portal/tickets/{token}")
 async def get_mock_portal_ticket(token: str):
@@ -330,6 +346,7 @@ async def get_mock_portal_ticket(token: str):
 # 4. SIMULATION DASHBOARD TICKET MANIPULATIONS
 # ---------------------------------------------------------
 
+
 @app.post("/api/simulator/mark-resolved/{token}")
 async def simulator_mark_resolved(token: str):
     """
@@ -338,9 +355,9 @@ async def simulator_mark_resolved(token: str):
     """
     if token not in MOCK_PORTAL_TICKETS:
         raise HTTPException(status_code=404, detail="Token not found in Mock Portal")
-         
+
     MOCK_PORTAL_TICKETS[token]["status"] = "RESOLVED"
-    
+
     # Locate the active incident mapping to this token and transition it
     for inc in db.list_incidents():
         if inc.official_token == token:
@@ -355,8 +372,9 @@ async def simulator_mark_resolved(token: str):
             ))
             db.save_incident(inc)
             return {"status": "success", "message": "Ticket marked resolved. Incident transitioned to VERIFYING."}
-            
+
     return {"status": "success", "message": "Ticket status marked RESOLVED in portal database."}
+
 
 @app.post("/api/simulator/trigger-sla-breach/{incident_id}")
 async def simulator_trigger_sla_breach(incident_id: str):
@@ -367,10 +385,11 @@ async def simulator_trigger_sla_breach(incident_id: str):
     incident = db.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-        
+
     incident.sla_deadline = (datetime.now() - timedelta(hours=1)).isoformat()
     db.save_incident(incident)
     return {"status": "success", "message": "SLA deadline fast-forwarded. Triggering breach on next agent tick."}
+
 
 @app.post("/api/simulator/simulate-crash/{incident_id}")
 async def simulator_simulate_crash(incident_id: str):
@@ -380,7 +399,7 @@ async def simulator_simulate_crash(incident_id: str):
     incident = db.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-        
+
     incident.status = "CLOSED"
     incident.timeline.append(TimelineEvent(
         timestamp=datetime.now().strftime("%d %b %H:%M"),
@@ -393,6 +412,7 @@ async def simulator_simulate_crash(incident_id: str):
     incident.updated_at = datetime.now().isoformat()
     db.save_incident(incident)
     return {"status": "success", "message": "Portal crash simulation triggered."}
+
 
 @app.get("/mock-portal", response_class=HTMLResponse)
 async def serve_mock_portal():
@@ -466,17 +486,18 @@ async def serve_mock_portal():
     </html>
     """
 
+
 @app.get("/api/incidents/{incident_id}/download-form")
 async def download_incident_form(incident_id: str):
     incident = db.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-        
+
     strategy_name = incident.current_strategy.name if incident.current_strategy else "Pending"
     dept_name = incident.current_strategy.department if incident.current_strategy else "Pending"
     sla_val = f"{incident.current_strategy.sla_hours} Hours" if incident.current_strategy else "Pending"
     conf_val = f"{int(incident.confidence * 100)}%" if incident.confidence else "0%"
-    
+
     html_content = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -688,12 +709,13 @@ async def download_incident_form(incident_id: str):
 
   <div class="section-title">Detailed Statement & AI Certification</div>
   <div class="statement-box">
-    This complaint is filed automatically regarding a civic hazard detected at the coordinates listed above. 
+    This complaint is filed automatically regarding a civic hazard detected at the coordinates listed above.
     Our perception vision analysis has confirmed the issue with <strong>{conf_val}</strong> confidence.
     <br><br>
-    The target authority (<strong>{dept_name}</strong>) is requested to dispatch a resolution team. 
+    The target authority (<strong>{dept_name}</strong>) is requested to dispatch a resolution team.
     ACIRP will continuously monitor the portal status and escalate this complaint if it is not resolved within the SLA period.
   </div>
+
 
   <div class="footer">
     <div>
@@ -717,17 +739,19 @@ async def download_incident_form(incident_id: str):
         }
     )
 
+
 @app.get("/api/incidents/{incident_id}/download-escalation-letter")
 async def download_escalation_letter(incident_id: str):
     incident = db.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-        
+
     escalation_paths = incident.current_strategy.escalation_path if incident.current_strategy else []
     # If level is 0, default to the first one in the list, otherwise use the level index
     target_idx = max(0, incident.escalation_level - 1)
-    escalation_target = escalation_paths[target_idx] if target_idx < len(escalation_paths) else "Zonal Administration Commissioner"
-    
+    escalation_target = escalation_paths[target_idx] if target_idx < len(
+        escalation_paths) else "Zonal Administration Commissioner"
+
     html_content = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -853,12 +877,12 @@ async def download_escalation_letter(incident_id: str):
   <div class="body-text">
     Dear Sir/Madam,
     <br><br>
-    This is an official escalation notice issued automatically by the ACIRP Autonomous Sensing Network on behalf of citizen <strong>{incident.complainant_name}</strong>. 
+    This is an official escalation notice issued automatically by the ACIRP Autonomous Sensing Network on behalf of citizen <strong>{incident.complainant_name}</strong>.
     <br><br>
     A civic safety hazard representing a <strong>{incident.issue_type.upper().replace('_', ' ')}</strong> was identified and registered in the municipal database on <strong>{incident.created_at}</strong>. Despite the lapse of the designated Service Level Agreement (SLA) window of <strong>{incident.current_strategy.sla_hours} hours</strong>, the status of this ticket in the municipal portal remains unresolved (Portal Tracking Token: <strong>{incident.official_token or "PENDING"}</strong>).
     <br><br>
     Due to the persistent delay in local execution and corresponding safety risks, the case has been officially escalated to your office for immediate review and administrative dispatch.
-    
+
     <table class="metadata-table">
       <tr>
         <th>Incident Reference ID</th>
@@ -881,8 +905,9 @@ async def download_escalation_letter(incident_id: str):
         <td>{incident.current_strategy.department}</td>
       </tr>
     </table>
-    
+
     We urge your office to issue immediate directions to the relevant field engineers to clear this hazard and update the municipal database registry.
+
   </div>
 
   <div class="signatures">
@@ -912,14 +937,14 @@ async def download_escalation_letter(incident_id: str):
 # ---------------------------------------------------------
 # PARITOK TOKEN-EFFICIENCY API ENDPOINTS
 # ---------------------------------------------------------
-from pydantic import BaseModel as FastAPIModel
-from agents.paritok_optimizer import ParitokContextOptimizer, paritok_session
+
 
 class OptimizeRequest(FastAPIModel):
     raw_prompt: str
     system_rules: Optional[str] = ""
     retrieved_docs: Optional[List[dict]] = None
     conversation_history: Optional[List[dict]] = None
+
 
 @app.get("/api/paritok/dashboard")
 async def get_paritok_dashboard():
@@ -932,6 +957,7 @@ async def get_paritok_dashboard():
     source_status = "PARITOK_HOSTED_API" if optimizer.api_key and optimizer.api_key != "dummy_key_for_offline_mock" else "LOCAL_FALLBACK_OPTIMIZER"
     summary["active_optimizer_source"] = source_status
     return summary
+
 
 @app.post("/api/paritok/optimize")
 async def optimize_custom_prompt(req: OptimizeRequest):
@@ -953,6 +979,7 @@ async def optimize_custom_prompt(req: OptimizeRequest):
         "metrics": metrics
     }
 
+
 @app.post("/api/paritok/compare")
 async def compare_with_without_paritok(req: OptimizeRequest):
     """
@@ -966,10 +993,10 @@ async def compare_with_without_paritok(req: OptimizeRequest):
         conversation_history=req.conversation_history or [],
         request_type="With vs Without Paritok Benchmark"
     )
-    
+
     cost_without = round((metrics.original_tokens / 1000.0) * optimizer.token_cost, 6)
     cost_with = round((metrics.optimized_tokens / 1000.0) * optimizer.token_cost, 6)
-    
+
     return {
         "without_paritok": {
             "prompt": metrics.original_prompt,
@@ -991,6 +1018,7 @@ async def compare_with_without_paritok(req: OptimizeRequest):
         "pruned_chunks": metrics.pruned_chunks
     }
 
+
 @app.get("/api/incidents/{incident_id}/paritok-metrics")
 async def get_incident_paritok_metrics(incident_id: str):
     """
@@ -1002,6 +1030,7 @@ async def get_incident_paritok_metrics(incident_id: str):
     return incident.paritok_metrics or {
         "message": "Paritok metrics pending for this incident."
     }
+
 
 @app.get("/api/paritok/dashboard")
 async def get_paritok_dashboard_metrics():
@@ -1021,5 +1050,4 @@ async def get_paritok_dashboard_metrics():
 # ---------------------------------------------------------
 # STATIC FILE SERVING FOR UPLOADED IMAGES
 # ---------------------------------------------------------
-from fastapi.staticfiles import StaticFiles
 app.mount("/static", StaticFiles(directory=UPLOAD_DIR), name="static")

@@ -12,6 +12,7 @@ from agents.paritok_optimizer import ParitokContextOptimizer
 
 logger = logging.getLogger("acirp.perception")
 
+
 class PerceptionAgent:
     def __init__(self, api_key: str):
         key = api_key or "dummy_key_for_offline_mock"
@@ -28,14 +29,14 @@ class PerceptionAgent:
         Estimate severity (low, medium, high) based on safety risk.
         Provide a concise engineering reason for the detection.
         """
-        
+
         # Paritok Optimization Layer
         optimized_prompt, paritok_metrics = await self.paritok.optimize_context(
             raw_prompt=raw_prompt,
             system_rules=system_rules,
             request_type="Perception Image Classification"
         )
-        
+
         class AnalysisResult(BaseModel):
             issue_type: Literal["pothole", "fallen_tree", "garbage", "unknown"]
             confidence: float = Field(description="Score between 0.0 and 1.0")
@@ -59,7 +60,7 @@ class PerceptionAgent:
             err_type = type(e).__name__
             err_str = str(e)
             logger.warning(f"Perception API Exception ({err_type}): {err_str}. Activating intelligent failover mock.")
-            
+
             name_lower = filename.lower()
             if "pothole" in name_lower:
                 fallback_type = "pothole"
@@ -71,17 +72,18 @@ class PerceptionAgent:
                 fallback_type = incident.issue_type
             else:
                 fallback_type = "pothole"
-                
+
             result = {
                 "issue_type": fallback_type,
                 "confidence": 0.88,
                 "severity": "medium",
                 "reasoning": f"Failover Mock Active ({err_type}: {err_str[:40]}...)"
             }
-            
+
         conf_percent = f"{int(result['confidence'] * 100)}%"
-        next_action_step = "Plan complaint submission" if result["confidence"] >= PHOTO_CONFIDENCE_THRESHOLD else "Request citizen photo re-upload"
-        
+        next_action_step = "Plan complaint submission" if result[
+            "confidence"] >= PHOTO_CONFIDENCE_THRESHOLD else "Request citizen photo re-upload"
+
         event = TimelineEvent(
             timestamp=datetime.now().strftime("%d %b %H:%M"),
             stage="PERCEPTION",
@@ -91,10 +93,10 @@ class PerceptionAgent:
             next_action=next_action_step,
             paritok_metrics=paritok_metrics
         )
-        
+
         incident.timeline.append(event)
         incident.paritok_metrics = paritok_metrics
-        
+
         if result["confidence"] < PHOTO_CONFIDENCE_THRESHOLD or result["issue_type"] == "unknown":
             incident.status = "AWAITING_REUPLOAD"
         else:
@@ -103,6 +105,6 @@ class PerceptionAgent:
             incident.severity = result["severity"]
             incident.confidence = result["confidence"]
             incident.goal = f"Resolve {result['issue_type'].replace('_', ' ')} incident with {result['severity']} severity"
-            
+
         incident.updated_at = datetime.now().isoformat()
         return incident

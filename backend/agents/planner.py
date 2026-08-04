@@ -1,14 +1,15 @@
 import logging
 import httpx
 from datetime import datetime, timedelta
-from typing import Optional
 from models import Incident, TimelineEvent, Strategy, PlannerDecision
 from config import DEFAULT_ROUTING
+
 from tools.portal_client import submit_to_portal_hybrid
 from db.base import BaseDatabase
 from agents.paritok_optimizer import ParitokContextOptimizer
 
 logger = logging.getLogger("acirp.planner")
+
 
 class PlanningAgent:
     def __init__(self, db: BaseDatabase):
@@ -21,16 +22,16 @@ class PlanningAgent:
         This represents the core tick of the stateless loop runner.
         """
         timestamp = datetime.now().strftime("%d %b %H:%M")
-        
+
         if incident.status == "PLANNED":
             # 1. Similarity Engine: Search for similar resolved cases within 500 meters
             nearby_resolved = self.db.find_nearby_resolved(
                 incident.latitude, incident.longitude, incident.issue_type, max_dist_meters=500.0
             )
-            
+
             chosen_strategy = DEFAULT_ROUTING.get(incident.issue_type)
             reason = f"No resolved cases found nearby. Loaded default routing for {incident.issue_type}."
-            
+
             # Format retrieved docs for Paritok optimizer
             retrieved_docs = []
             for inc in nearby_resolved:
@@ -56,9 +57,9 @@ class PlanningAgent:
             # Paritok Optimization
 
             raw_prompt = f"Determine optimal municipal routing for {incident.issue_type} at GPS ({incident.latitude}, {incident.longitude})."
-            system_rules = f"Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry."
-            
+            system_rules = "Evaluate department jurisdiction SLA rules. Available strategies: PWD, Waste Management, Forestry."
             _, paritok_metrics = await self.paritok.optimize_context(
+
                 raw_prompt=raw_prompt,
                 system_rules=system_rules,
                 retrieved_docs=retrieved_docs,
@@ -68,14 +69,15 @@ class PlanningAgent:
 
             # If we found resolved incidents nearby, check if they used a customized or faster route
             if nearby_resolved:
-                fastest_inc = min(nearby_resolved, key=lambda x: x.current_strategy.sla_hours if x.current_strategy else 999)
+                fastest_inc = min(
+                    nearby_resolved, key=lambda x: x.current_strategy.sla_hours if x.current_strategy else 999)
                 if fastest_inc.current_strategy and fastest_inc.current_strategy.sla_hours < chosen_strategy.sla_hours:
                     chosen_strategy = fastest_inc.current_strategy
                     reason = f"Similarity search found resolved case {fastest_inc.id} nearby that resolved faster via {chosen_strategy.name}."
-            
+
             incident.current_strategy = chosen_strategy
             incident.goal = f"Resolve {incident.issue_type.replace('_', ' ')} incident using {chosen_strategy.department} route"
-            
+
             event = TimelineEvent(
                 timestamp=timestamp,
                 stage="PLANNER",
@@ -87,10 +89,10 @@ class PlanningAgent:
             )
             incident.timeline.append(event)
             incident.paritok_metrics = paritok_metrics
-            
+
             incident.status = "SUBMITTED"
             incident.updated_at = datetime.now().isoformat()
-            
+
         elif incident.status == "SUBMITTED":
             # 2. Complaint Submission Tool execution
             incident.timeline.append(TimelineEvent(
@@ -101,17 +103,17 @@ class PlanningAgent:
                 reason="Submitting official complaint to municipal portal",
                 next_action="Awaiting tracking token confirmation from government registry"
             ))
-            
+
             try:
                 incident_dict = incident.model_dump()
                 token = await submit_to_portal_hybrid(incident_dict, mode=submission_mode)
-                
+
                 incident.official_token = token
                 incident.status = "MONITORING"
-                
+
                 sla_hours = incident.current_strategy.sla_hours if incident.current_strategy else 24
                 incident.sla_deadline = (datetime.now() + timedelta(hours=sla_hours)).isoformat()
-                
+
                 incident.timeline.append(TimelineEvent(
                     timestamp=timestamp,
                     stage="TOOL",
@@ -132,9 +134,9 @@ class PlanningAgent:
                     reason=f"Unable to connect to municipal database ({err_type}): {str(e)}",
                     next_action="Requesting citizen approval for direct escalation notice"
                 ))
-                
+
             incident.updated_at = datetime.now().isoformat()
-            
+
         elif incident.status == "MONITORING":
             if incident.sla_deadline:
                 deadline = datetime.fromisoformat(incident.sla_deadline)
@@ -166,7 +168,7 @@ class PlanningAgent:
 
     def get_brain_decision(self, incident: Incident) -> PlannerDecision:
         requires_human = incident.status in ["AWAITING_REUPLOAD", "VERIFYING", "ESCALATED"]
-        
+
         next_actions = {
             "DETECTED": "Assessing visual evidence and coordinates",
             "AWAITING_REUPLOAD": "Awaiting clear photo evidence from citizen",
@@ -177,7 +179,7 @@ class PlanningAgent:
             "ESCALATED": "Awaiting approval to escalate complaint to higher authority",
             "CLOSED": "Civic hazard resolved successfully."
         }
-        
+
         return PlannerDecision(
             goal=incident.goal or "Awaiting incident detection",
             current_state=incident.status,
@@ -190,6 +192,7 @@ class PlanningAgent:
             confidence=incident.confidence or 0.0,
             paritok_metrics=incident.paritok_metrics
         )
+
 
 def config_sleep_time() -> int:
     from config import MONITOR_SLEEP_INTERVAL_SEC

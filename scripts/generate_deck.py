@@ -1,30 +1,32 @@
 import os
 from fpdf import FPDF
 
+
 class PitchDeck(FPDF):
     def header_slide(self, title):
         # Draw background color
         self.set_fill_color(11, 15, 25)
         self.rect(0, 0, 297, 210, "F")
-        
+
         # Header bar accent
         self.set_fill_color(66, 133, 244)
         self.rect(0, 0, 297, 3, "F")
-        
+
         # Title text
         self.set_font("Arial", "B", 18)
         self.set_text_color(66, 133, 244)
         self.text(15, 20, title)
-        
+
         # Subtitle
         self.set_font("Arial", "", 9)
         self.set_text_color(156, 163, 175)
         self.text(15, 25, "ACIRP | Autonomous Civic Incident Platform")
-        
+
         # Page count
         self.set_font("Arial", "B", 18)
         self.set_text_color(156, 163, 175)
         self.text(270, 20, f"0{self.page_no()}")
+
 
 # Initialize PDF
 pdf = PitchDeck(orientation="landscape", unit="mm", format="A4")
@@ -65,7 +67,7 @@ pdf.text(20, 150, "Team Leader: Vismaya Vishwas")
 pdf.set_font("Arial", "", 9)
 pdf.set_text_color(156, 163, 175)
 pdf.text(20, 160, "Email: vismayavishwas11@gmail.com")
-pdf.set_text_color(251, 188, 5) # Yellow
+pdf.set_text_color(251, 188, 5)  # Yellow
 pdf.text(20, 170, "Integrations: Gemini 2.5, Firebase, Google Cloud, Mem0, Keploy")
 
 # ==============================================================
@@ -77,7 +79,7 @@ pdf.header_slide("Problem & Solution")
 # Left Card: Problem
 pdf.set_fill_color(20, 29, 47)
 pdf.rect(15, 45, 125, 145, "F")
-pdf.set_fill_color(219, 68, 85) # Red
+pdf.set_fill_color(219, 68, 85)  # Red
 pdf.rect(15, 45, 125, 2, "F")
 pdf.set_font("Arial", "B", 14)
 pdf.set_text_color(219, 68, 85)
@@ -106,7 +108,7 @@ for p in problems:
 # Right Card: Solution
 pdf.set_fill_color(20, 29, 47)
 pdf.rect(157, 45, 125, 145, "F")
-pdf.set_fill_color(52, 168, 83) # Green
+pdf.set_fill_color(52, 168, 83)  # Green
 pdf.rect(157, 45, 125, 2, "F")
 pdf.set_font("Arial", "B", 14)
 pdf.set_text_color(52, 168, 83)
@@ -146,14 +148,14 @@ for name, x in steps:
     # Card box
     pdf.set_fill_color(20, 29, 47)
     pdf.rect(x, 45, 32, 20, "F")
-    
+
     # Title Text
     pdf.set_font("Arial", "B", 8.5)
     pdf.set_text_color(255, 255, 255)
     # Centering text inside the box
     pdf.set_xy(x, 52)
     pdf.multi_cell(32, 4, name, 0, "C")
-    
+
     # Draw arrow to next box if not the last one
     if x < 250:
         pdf.set_draw_color(66, 133, 244)

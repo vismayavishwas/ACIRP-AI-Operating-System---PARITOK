@@ -506,6 +506,7 @@ function CumulativeParitokMetricsTable({ incidents = [] }) {
     });
   }
 
+  const totalRequests = summary && summary.total_requests !== undefined ? summary.total_requests : trials.length;
   const totalOriginal = summary && summary.total_original_tokens ? summary.total_original_tokens : trials.reduce((acc, t) => acc + t.originalTokens, 0);
   const totalOptimized = summary && summary.total_optimized_tokens ? summary.total_optimized_tokens : trials.reduce((acc, t) => acc + t.optimizedTokens, 0);
   const totalSaved = summary && summary.total_tokens_saved !== undefined ? summary.total_tokens_saved : trials.reduce((acc, t) => acc + t.tokensSaved, 0);
@@ -525,57 +526,52 @@ function CumulativeParitokMetricsTable({ incidents = [] }) {
             </h3>
           </div>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Real-time trajectory compression metrics starting from deployment (0 tokens saved baseline)
+            Real-time trajectory compression metrics starting from deployment (0 baseline)
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono font-bold">
           <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
             <Sparkles className="h-4 w-4 text-emerald-400" />
-            <span>Total Tokens Saved: <strong className="text-emerald-400 text-sm">⚡ {totalSaved.toLocaleString()} tokens</strong></span>
+            <span>Optimization Source: <strong className="text-emerald-400 text-xs">{isParitokHosted ? "PARITOK_HOSTED_API" : "FALLBACK"}</strong></span>
           </div>
         </div>
       </div>
 
-      {/* Transparent Source Labeling Status Banner */}
-      <div className={`rounded-xl p-3 mb-4 flex items-center justify-between text-xs font-mono border ${
-        isParitokHosted
-          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-500/5"
-          : "bg-amber-500/10 border-amber-500/30 text-amber-200 shadow-sm shadow-amber-500/5"
-      }`}>
-        <div className="flex items-center gap-2.5">
-          <ShieldCheck className={`h-4.5 w-4.5 flex-shrink-0 ${isParitokHosted ? "text-emerald-400" : "text-amber-400"}`} />
-          <span>
-            <strong>Optimization Status:</strong> {isParitokHosted
-              ? "Paritok API Optimized (Hosted GPU Server Active)"
-              : "Paritok API unavailable — using fallback local context optimizer"
-            }
-          </span>
+      {/* Two Small Dynamic Summary Cards Starting From Zero */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        {/* Small Box 1: Requests Sent */}
+        <div className="bg-slate-950/70 border border-cyan-500/30 p-4 rounded-xl flex items-center justify-between shadow-lg">
+          <div>
+            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold">Requests Sent</div>
+            <div className="text-2xl font-extrabold font-mono text-cyan-400 mt-1">
+              {totalRequests} <span className="text-xs font-normal text-slate-400">(Live Requests Processed)</span>
+            </div>
+          </div>
+          <div className="bg-cyan-500/10 border border-cyan-500/20 p-3 rounded-xl text-cyan-400">
+            <Radio className="h-6 w-6" />
+          </div>
         </div>
-        <div className="hidden sm:block text-[11px] font-bold text-slate-300">
-          API Key: <code className="bg-slate-900 px-2 py-0.5 rounded text-cyan-300 border border-white/10">pk_live_MHxy...</code>
+
+        {/* Small Box 2: Tokens Saved & Money Saved */}
+        <div className="bg-slate-950/70 border border-emerald-500/30 p-4 rounded-xl flex items-center justify-between shadow-lg">
+          <div>
+            <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold">Paritok Savings Cumulative Summary</div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1.5 font-mono">
+              <div className="text-xs text-slate-300">
+                tokens saved so far: <strong className="text-emerald-400 text-sm font-extrabold">⚡ {totalSaved.toLocaleString()} tokens</strong>
+              </div>
+              <div className="text-xs text-slate-300 border-t sm:border-t-0 sm:border-l border-white/10 pt-1 sm:pt-0 sm:pl-3">
+                money saved so far: <strong className="text-amber-300 text-sm font-extrabold">${typeof totalCostUsd === "number" ? totalCostUsd.toFixed(6) : totalCostUsd}</strong>
+              </div>
+            </div>
+          </div>
+          <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl text-emerald-400">
+            <Sparkles className="h-6 w-6" />
+          </div>
         </div>
       </div>
 
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        <div className="bg-slate-950/60 border border-white/5 p-3.5 rounded-xl">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Total Tokens Saved Till Now</div>
-          <div className="text-lg font-extrabold font-mono text-emerald-400 mt-1">⚡ {totalSaved.toLocaleString()}</div>
-        </div>
-        <div className="bg-slate-950/60 border border-white/5 p-3.5 rounded-xl">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Raw Input Tokens</div>
-          <div className="text-lg font-extrabold font-mono text-rose-300 mt-1">{totalOriginal.toLocaleString()}</div>
-        </div>
-        <div className="bg-slate-950/60 border border-white/5 p-3.5 rounded-xl">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Optimized Input Tokens</div>
-          <div className="text-lg font-extrabold font-mono text-cyan-300 mt-1">{totalOptimized.toLocaleString()}</div>
-        </div>
-        <div className="bg-slate-950/60 border border-white/5 p-3.5 rounded-xl">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Cumulative USD Saved</div>
-          <div className="text-lg font-extrabold font-mono text-amber-300 mt-1">${typeof totalCostUsd === "number" ? totalCostUsd.toFixed(5) : totalCostUsd}</div>
-        </div>
-      </div>
 
       {/* ONE Single Unified Graceful Table */}
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-950/40">

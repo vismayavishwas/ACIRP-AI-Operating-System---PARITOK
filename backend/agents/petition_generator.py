@@ -62,9 +62,33 @@ class LegalPetitionGenerator:
     body {{
       font-family: 'Times New Roman', Times, serif;
       color: #0f172a;
-      margin: 45px;
-      line-height: 1.7;
+      margin: 40px;
+      line-height: 1.6;
       background: #ffffff;
+    }}
+    .no-print-bar {{
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 20px;
+      margin: -40px -40px 30px -40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: sans-serif;
+      font-size: 13px;
+    }}
+    .print-btn {{
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }}
+    .print-btn:hover {{
+      background: #1d4ed8;
     }}
     .letterhead {{
       border-bottom: 2px solid #0f172a;
@@ -74,7 +98,7 @@ class LegalPetitionGenerator:
     }}
     .letterhead h1 {{
       margin: 0;
-      font-size: 22px;
+      font-size: 20px;
       text-transform: uppercase;
       letter-spacing: 1px;
     }}
@@ -127,9 +151,9 @@ class LegalPetitionGenerator:
     }}
     .evidence-box {{
       background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #cbd5e1;
       padding: 14px;
-      font-size: 12px;
+      font-size: 11px;
       font-family: monospace;
       white-space: pre-wrap;
       margin-bottom: 20px;
@@ -151,9 +175,19 @@ class LegalPetitionGenerator:
       font-size: 12px;
       font-family: sans-serif;
     }}
+    @media print {{
+      .no-print-bar {{ display: none !important; }}
+      body {{ margin: 15mm; font-size: 11pt; }}
+      .paritok-hero-card {{ background: #f8fafc !important; border: 1px solid #cbd5e1 !important; color: #000 !important; }}
+    }}
   </style>
 </head>
 <body>
+  <div class="no-print-bar">
+    <span>⚖️ ACIRP Legal Petition Compiler Node</span>
+    <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF Petition</button>
+  </div>
+
   <div class="letterhead">
     <h1>MEMORANDUM OF CIVIC COMPLAINT & LEGAL PETITION</h1>
     <p>Filed under Statutory Authority of KMCA 1976 & Sakala Guarantee Act 2011</p>
@@ -186,23 +220,21 @@ class LegalPetitionGenerator:
     GPS ({incident.latitude}, {incident.longitude}).
   </p>
 
-  <div class="section-header">I. STATUTORY GROUNDS & MANDATES</div>
+  <div class="section-header">I. CONSTITUTIONAL & STATUTORY MANDATES</div>
   <p>
-    1. Under <strong>Section 58 & 265 of the Karnataka Municipal Corporations Act (KMCA) 1976</strong>, the Municipal Corporation
-    holds a non-delegable statutory obligation to keep public thoroughfares free of safety hazards and obstructions.<br>
-    2. Under the <strong>Karnataka Sakala Services Guarantee Act 2011</strong>, road and public safety hazards carry a mandatory
-    statutory resolution deadline of 48 hours. Continued delay exposes the nodal department to automatic statutory default penalties.<br>
-    3. Under <strong>Article 21 of the Constitution of India</strong> (WP 42927/2015), citizens possess a fundamental right to safe, hazard-free public infrastructure.
+    1. <strong>Article 21 of the Constitution of India:</strong> High Court Precedent (WP 42927/2015) establishes that the Right to Life includes the fundamental right to safe, hazard-free roads and clean public spaces.<br>
+    2. <strong>KMCA 1976 (Section 58 & 265 / Section 272 / Section 336):</strong> Imposes an obligatory duty on the Corporation to maintain streets, clear waste blackspots, and secure dangerous hazards.<br>
+    3. <strong>Karnataka Sakala Services Guarantee Act 2011:</strong> Mandatory statutory resolution deadline (24-48h). Section 12 authorizes automatic salary deduction penalties on defaulting Nodal Officers.
   </p>
 
-
-  <div class="section-header">II. CONTRACTOR SLA LIABILITY & LIQUIDATED DAMAGES</div>
+  <div class="section-header">II. DEPARTMENTAL SOPS & CONTRACTOR SLA PENALTY</div>
   <p>
-    1. <strong>Clause 14.2 (Defect Liability Period):</strong> Reinstatement of failed asphalt/infrastructure within 12 months is the mandatory financial responsibility of the active ward contractor.<br>
-    2. <strong>Clause 18.5 (Liquidated Damages Penalty):</strong> Failure to rectify reported safety hazards following citizen notice empowers the administration to assess liquidated damages of <strong>₹5,000 per calendar day</strong> against contractor billing.
+    1. <strong>Departmental Repair SOP:</strong> Mandates strict compliance with IRC:82-2023 (Pothole compaction) / BBMP SWM Bylaws 2020 (Garbage blackspots) / Forest Wing Emergency Protocol 2023 (Fallen trees).<br>
+    2. <strong>Clause 14.2 (Defect Liability Period):</strong> Free-of-cost 12-month contractor reinstatement obligation.<br>
+    3. <strong>Clause 18.5 (Liquidated Damages Penalty):</strong> Mandatory penalty assessment of <strong>₹5,000 per calendar day</strong> against contractor billing following citizen notice.
   </p>
 
-  <div class="section-header">III. PARITOK-OPTIMIZED COMPRESSED EVIDENCE CONTEXT</div>
+  <div class="section-header">III. PARITOK-OPTIMIZED ESSENTIAL EVIDENCE CONTEXT (~{metrics.optimized_tokens} TOKENS)</div>
   <div class="evidence-box">{optimized_evidence}</div>
 
   <div class="prayer-box">
@@ -230,6 +262,7 @@ class LegalPetitionGenerator:
 """
 
         return {
+
             "html_petition": html_petition,
             "original_tokens": metrics.original_tokens,
             "optimized_tokens": metrics.optimized_tokens,

@@ -458,12 +458,11 @@ function CumulativeParitokMetricsTable({ incidents = [] }) {
     return () => clearInterval(interval);
   }, []);
 
-  const summary = dashboardData?.summary;
+  const totalRequests = dashboardData?.total_requests ?? dashboardData?.summary?.total_requests ?? 0;
+  const totalSaved = dashboardData?.total_tokens_saved ?? dashboardData?.summary?.total_tokens_saved ?? 0;
+  const totalCostUsd = dashboardData?.total_cost_saved_usd ?? dashboardData?.summary?.total_cost_saved_usd ?? 0.0;
+  const isParitokHosted = (dashboardData?.active_optimizer_source || dashboardData?.summary?.active_optimizer_source) === "PARITOK_HOSTED_API";
 
-  const totalRequests = summary && summary.total_requests !== undefined ? summary.total_requests : 0;
-  const totalSaved = summary && summary.total_tokens_saved !== undefined ? summary.total_tokens_saved : 0;
-  const totalCostUsd = summary && summary.total_cost_saved_usd !== undefined ? summary.total_cost_saved_usd : 0.0;
-  const isParitokHosted = dashboardData?.active_optimizer_source === "PARITOK_HOSTED_API";
 
   return (
     <div className="bg-[#10172E]/90 border border-cyan-500/30 rounded-2xl p-5 my-6 backdrop-blur-md shadow-2xl text-left">

@@ -160,12 +160,22 @@ class ParitokContextOptimizer:
                 if system_rules:
                     req_msgs.append({"role": "system", "content": system_rules})
                 if retrieved_docs:
+                    doc_texts = []
                     for idx, doc in enumerate(retrieved_docs):
-                        req_msgs.append({"role": "system", "content": f"Retrieved Document #{idx + 1}: {doc}"})
+                        doc_texts.append(f"Document #{idx + 1}: {doc}")
+                    req_msgs.append({
+                        "role": "user",
+                        "content": "--- RETRIEVED INCIDENT KNOWLEDGE & RAG DOCUMENTS ---\n" + "\n\n".join(doc_texts)
+                    })
                 if conversation_history:
                     for h in conversation_history:
                         req_msgs.append({"role": h.get("role", "user"), "content": h.get("content", "")})
-                req_msgs.append({"role": "user", "content": raw_prompt})
+                req_msgs.append({"role": "user", "content": f"--- CITIZEN TASK INPUT ---\n{raw_prompt}"})
+
+                print("========== PARITOK REQUEST MESSAGES ==========")
+                print(req_msgs)
+                print("Estimated input tokens:", estimate_tokens(str(req_msgs)))
+                print("=============================================")
 
                 # Execute ParitokEngine processing
                 opt_msgs, _, stats, _ = engine.process_request(req_msgs)
@@ -175,8 +185,8 @@ class ParitokContextOptimizer:
                 if hasattr(stats, '__dict__'):
                     print(vars(stats))
                 print("=======================================")
-
                 orig_t = getattr(stats, "original_tokens", 0) or getattr(stats, "input_tokens_original", 0)
+
                 comp_t = getattr(stats, "compressed_tokens", 0) or getattr(stats, "input_tokens_compressed", 0)
                 items_c = getattr(stats, "items_compressed", 0)
 

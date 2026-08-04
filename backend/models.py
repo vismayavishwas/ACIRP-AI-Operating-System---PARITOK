@@ -30,7 +30,8 @@ class ParitokMetrics(BaseModel):
 
 class TimelineEvent(BaseModel):
     timestamp: str
-    stage: Literal["PERCEPTION", "PLANNER", "TOOL", "MONITOR", "VERIFY", "ESCALATION", "SYSTEM"]
+    stage: Literal["PERCEPTION", "PLANNER", "TOOL", "MONITOR", "VERIFY", "ESCALATION", "SYSTEM", "PETITION"]
+
     decision: str
     confidence: str
     reason: str

@@ -117,6 +117,21 @@ async def create_incident(
     if incident.status == "PLANNED":
         incident = await planner_agent.execute_step(incident)
 
+    # Step 3: Run Civic Evidence Retrieval & Legal Petition Assembly (~5,200 token bundle through Paritok)
+    res = await legal_petition_generator.generate_petition(
+        incident,
+        escalation_target="Ward Junior Engineer & Nodal Officer"
+    )
+    incident.timeline.append(TimelineEvent(
+        timestamp=datetime.now().strftime("%d %b %H:%M"),
+        stage="PETITION",
+        decision="Civic Evidence Retrieval & Legal Petition Assembled",
+        confidence="100%",
+        reason=f"Assembled statutory evidence bundle. Paritok compressed context from {res['original_tokens']} to {res['optimized_tokens']} tokens.",
+        next_action="Petition submitted to department portal",
+        paritok_metrics=res.get("paritok_metrics")
+    ))
+
     # Save to mock database
     db.save_incident(incident)
     return incident
@@ -124,6 +139,7 @@ async def create_incident(
 
 @app.post("/api/incidents/{incident_id}/verify-resolution")
 async def verify_incident_resolution(
+
     incident_id: str,
     image: UploadFile = File(...)
 ):
@@ -209,6 +225,12 @@ async def approve_escalation(incident_id: str):
     if incident.escalation_level <= len(escalation_paths):
         escalation_target = escalation_paths[incident.escalation_level - 1]
 
+        # Generate escalated legal petition & Paritok optimization
+        res = await legal_petition_generator.generate_petition(
+            incident,
+            escalation_target=escalation_target
+        )
+
         # Reset status back to monitoring after escalation action
         incident.status = "MONITORING"
         # Grant a fresh 12h SLA window for escalated authority checks
@@ -219,9 +241,11 @@ async def approve_escalation(incident_id: str):
             stage="ESCALATION",
             decision=f"Escalated to {escalation_target}",
             confidence="100%",
-            reason=f"Human approved escalation. Strategy shifting to level {incident.escalation_level}.",
-            next_action=f"Monitoring response from {escalation_target}"
+            reason=f"Human approved escalation. Assembled escalated legal petition. Paritok compressed context from {res['original_tokens']} to {res['optimized_tokens']} tokens.",
+            next_action=f"Monitoring response from {escalation_target}",
+            paritok_metrics=res.get("paritok_metrics")
         ))
+
     else:
         # Escalation paths exhausted: suggest direct emergency help
         incident.status = "CLOSED"

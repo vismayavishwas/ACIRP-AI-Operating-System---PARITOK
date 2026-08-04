@@ -42,32 +42,17 @@ class PlanningAgent:
                     "relevance": 0.85,
                     "age_days": 12
                 })
-            # TEST_HUGE_RAG_BENCHMARK_TOGGLE: Artificially large RAG context to benchmark Paritok pipeline
-            retrieved_docs.extend([
-                {
-                    "id": "test_huge_rag_1",
-                    "department": "Public Works Dept",
-                    "summary": "Pothole near school on 5th Main Road. Citizen reported deep cavity causing traffic slow-down. Inspection team dispatched. Material estimate: 200kg asphalt patch mix. Safety cones installed. SLA target 48h. " * 100,
-                    "relevance": 0.90,
-                    "age_days": 2
-                },
-                {
-                    "id": "test_huge_rag_2",
-                    "department": "Waste Management Dept",
-                    "summary": "Previous complaints filed by resident welfare association regarding garbage overflow near drainage canal. Waterlogging risk identified. Heavy machinery required for clearing debris. Supervisor assigned. " * 100,
-                    "relevance": 0.85,
-                    "age_days": 5
-                },
-                {
-                    "id": "test_huge_rag_3",
-                    "department": "Forest & Parks Dept",
-                    "summary": "Municipal maintenance history log. Fallen tree branch obstructing power lines near residential complex. Horticulture officer cleared limbs and restored pedestrian walkway access. " * 100,
-                    "relevance": 0.80,
-                    "age_days": 10
-                }
-            ])
+            # Add synthetic low-relevance & old incident docs to demonstrate Paritok pruning
+            retrieved_docs.append({
+                "id": "inc_old_99",
+                "department": "Traffic Police",
+                "summary": "Speeding violation record from 2022",
+                "relevance": 0.15,
+                "age_days": 450
+            })
 
             # Format conversation history
+
             history = [{"role": e.stage.lower(), "content": e.decision} for e in incident.timeline]
 
             # Paritok Optimization

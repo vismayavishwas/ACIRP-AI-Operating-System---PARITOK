@@ -1,0 +1,24 @@
+# Paritok Configuration File for ACIRP AI Operating System
+use_gpu_server: true
+
+gpu_server:
+  api_key: "pk_live_MHxyQjvpksZ39-KjUtyA9GZfSEWHsWZb"
+  base_url: "https://www.paritok.com/api"
+  model: "paritok-4b-v1"
+  temperature: 0.0
+  timeout: 90.0
+
+compression:
+  min_tokens: 30
+  max_tokens: 50000
+  refusal_threshold: 0.05
+
+history:
+  enabled: true
+  keep_recent_turns: 4
+  context_threshold: 0.8
+  context_window: 200000
+
+tool_discovery:
+  strategy: "embedding"
+  top_k: 5

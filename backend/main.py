@@ -111,7 +111,10 @@ async def create_incident(
         next_action="Trigger Perception Agent Vision classifier"
     ))
     # Run the Perception Agent directly (passing the dynamic MIME type)
-    incident = await perception_agent.analyze(image_bytes, incident, mime_type=image.content_type or "image/jpeg", filename=image.filename)
+    incident = await perception_agent.analyze(
+        image_bytes, incident,
+        mime_type=image.content_type or "image/jpeg",
+        filename=image.filename)
 
     # Run the Planning Agent strategy determination & Paritok RAG optimization
     if incident.status == "PLANNED":
@@ -122,12 +125,18 @@ async def create_incident(
         incident,
         escalation_target="Ward Junior Engineer & Nodal Officer"
     )
+    # Store the petition's Paritok metrics on the incident so the dashboard reflects
+    # the petition optimization (not the planner/perception prompts).
+    incident.paritok_metrics = res.get("paritok_metrics")
     incident.timeline.append(TimelineEvent(
         timestamp=datetime.now().strftime("%d %b %H:%M"),
         stage="PETITION",
         decision="Civic Evidence Retrieval & Legal Petition Assembled",
         confidence="100%",
-        reason=f"Assembled statutory evidence bundle. Paritok compressed context from {res['original_tokens']} to {res['optimized_tokens']} tokens.",
+        reason=(
+            f"Assembled statutory evidence bundle. Paritok compressed context "
+            f"from {res['original_tokens']} to {res['optimized_tokens']} tokens."
+        ),
         next_action="Petition submitted to department portal",
         paritok_metrics=res.get("paritok_metrics")
     ))
@@ -230,6 +239,8 @@ async def approve_escalation(incident_id: str):
             incident,
             escalation_target=escalation_target
         )
+        # Store the escalated petition's Paritok metrics on the incident.
+        incident.paritok_metrics = res.get("paritok_metrics")
 
         # Reset status back to monitoring after escalation action
         incident.status = "MONITORING"
@@ -241,7 +252,11 @@ async def approve_escalation(incident_id: str):
             stage="ESCALATION",
             decision=f"Escalated to {escalation_target}",
             confidence="100%",
-            reason=f"Human approved escalation. Assembled escalated legal petition. Paritok compressed context from {res['original_tokens']} to {res['optimized_tokens']} tokens.",
+            reason=(
+                f"Human approved escalation. Assembled escalated legal petition. "
+                f"Paritok compressed context from {res['original_tokens']} "
+                f"to {res['optimized_tokens']} tokens."
+            ),
             next_action=f"Monitoring response from {escalation_target}",
             paritok_metrics=res.get("paritok_metrics")
         ))
@@ -292,7 +307,10 @@ async def re_upload_image(incident_id: str, image: UploadFile = File(...)):
         next_action="Rerunning Perception Agent analysis"
     ))
 
-    incident = await perception_agent.analyze(image_bytes, incident, mime_type=image.content_type or "image/jpeg", filename=image.filename)
+    incident = await perception_agent.analyze(
+        image_bytes, incident,
+        mime_type=image.content_type or "image/jpeg",
+        filename=image.filename)
     db.save_incident(incident)
     return incident
 
@@ -456,9 +474,13 @@ async def serve_mock_portal():
             <title>BBMP Municipal Incident Registration</title>
             <style>
                 body { font-family: sans-serif; background: #0f172a; color: #f1f5f9; padding: 40px; }
-                .form-box { max-width: 500px; margin: auto; background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155; }
-                input, select { width: 100%; padding: 8px; margin: 10px 0; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 4px; }
-                button { background: #10b981; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; width: 100%; font-weight: bold; }
+                .form-box { max-width: 500px; margin: auto; background: #1e293b;
+                  padding: 20px; border-radius: 8px; border: 1px solid #334155; }
+                input, select { width: 100%; padding: 8px; margin: 10px 0;
+                  background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 4px; }
+                button { background: #10b981; color: white; border: none;
+                  padding: 10px 20px; cursor: pointer; border-radius: 4px;
+                  width: 100%; font-weight: bold; }
                 button:hover { background: #059669; }
             </style>
         </head>
@@ -582,7 +604,10 @@ async def get_paritok_dashboard():
     """
     summary = paritok_session.get_summary()
     optimizer = ParitokContextOptimizer()
-    source_status = "PARITOK_HOSTED_API" if optimizer.api_key and optimizer.api_key != "dummy_key_for_offline_mock" else "LOCAL_FALLBACK_OPTIMIZER"
+    if optimizer.api_key and optimizer.api_key != "dummy_key_for_offline_mock":
+        source_status = "PARITOK_HOSTED_API"
+    else:
+        source_status = "LOCAL_FALLBACK_OPTIMIZER"
     return {
         "active_optimizer_source": source_status,
         "summary": summary,

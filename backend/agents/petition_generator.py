@@ -1,3 +1,4 @@
+import html
 import logging
 from typing import Dict, Any
 from datetime import datetime
@@ -7,6 +8,11 @@ from agents.evidence_retrieval import civic_evidence_agent
 from agents.paritok_optimizer import ParitokContextOptimizer
 
 logger = logging.getLogger("acirp.petition_generator")
+
+
+def _esc(text) -> str:
+    """Escape text for safe HTML embedding."""
+    return html.escape(str(text), quote=True)
 
 
 class LegalPetitionGenerator:
@@ -19,6 +25,75 @@ class LegalPetitionGenerator:
 
     def __init__(self):
         self.optimizer = ParitokContextOptimizer()
+
+    def _build_evidence_sections(self, evidence: Dict[str, Any], issue_title: str) -> str:
+        """Build case-specific petition sections from the retrieved evidence bundle."""
+        html_parts = []
+
+        # Section I: Constitutional & citizen-rights mandates
+        const_items = []
+        for idx, item in enumerate(evidence.get("constitutional_rights", [])):
+            const_items.append(
+                f"{idx + 1}. <strong>{_esc(item.get('title', ''))}:</strong> {_esc(item.get('content', ''))}"
+            )
+        if const_items:
+            html_parts.append(
+                '<div class="section-header">I. CONSTITUTIONAL & STATUTORY MANDATES</div>\n  <p>\n    '
+                + '<br>\n    '.join(const_items)
+                + "\n  </p>"
+            )
+
+        # Section II: Case-type specific statutory legislation
+        stat_items = []
+        for idx, item in enumerate(evidence.get("statutory_sections", [])):
+            stat_items.append(
+                f"{idx + 1}. <strong>{_esc(item.get('section', ''))}:</strong> {_esc(item.get('mandate', ''))}"
+            )
+        if stat_items:
+            header = f"II. STATUTORY LEGISLATION APPLICABLE TO {_esc(issue_title)}"
+            html_parts.append(
+                f'<div class="section-header">{header}</div>\n  <p>\n    '
+                + '<br>\n    '.join(stat_items)
+                + "\n  </p>"
+            )
+
+        # Section III: Departmental SOPs
+        sop_items = []
+        for idx, sop in enumerate(evidence.get("departmental_sops", [])):
+            sop_items.append(f"{idx + 1}. {_esc(sop)}")
+        if sop_items:
+            html_parts.append(
+                '<div class="section-header">III. DEPARTMENTAL SOPS & REPAIR STANDARDS</div>\n  <p>\n    '
+                + '<br>\n    '.join(sop_items)
+                + "\n  </p>"
+            )
+
+        # Section IV: Contractor SLA & liquidated damages clauses
+        contractor_items = []
+        for idx, clause in enumerate(evidence.get("contractor_sla_clauses", [])):
+            contractor_items.append(f"{idx + 1}. {_esc(clause)}")
+        if contractor_items:
+            html_parts.append(
+                '<div class="section-header">IV. CONTRACTOR SLA & LIQUIDATED DAMAGES CLAUSES</div>\n  <p>\n    '
+                + '<br>\n    '.join(contractor_items)
+                + "\n  </p>"
+            )
+
+        # Section V: Historical ward precedents
+        precedent_items = []
+        for idx, prec in enumerate(evidence.get("historical_precedents", [])):
+            precedent_items.append(
+                f"{idx + 1}. <strong>[{_esc(prec.get('id', ''))}] ({_esc(prec.get('ward', ''))}):</strong> "
+                f"{_esc(prec.get('details', ''))} <em>Outcome: {_esc(prec.get('outcome', ''))}</em>"
+            )
+        if precedent_items:
+            html_parts.append(
+                '<div class="section-header">V. HISTORICAL WARD PRECEDENTS</div>\n  <p>\n    '
+                + '<br>\n    '.join(precedent_items)
+                + "\n  </p>"
+            )
+
+        return "\n\n  ".join(html_parts) if html_parts else ""
 
     async def generate_petition(
         self,
@@ -48,10 +123,17 @@ class LegalPetitionGenerator:
         )
 
         # Step 3: Format Legal Petition Document (HTML)
-        dept_name = incident.current_strategy.department if incident.current_strategy else "Public Works & Engineering Dept"
+        dept_name = (
+            incident.current_strategy.department
+            if incident.current_strategy
+            else "Public Works & Engineering Dept"
+        )
         issue_title = (incident.issue_type or "pothole").replace("_", " ").upper()
         token_str = incident.official_token or "BBMP-PENDING-DISPATCH"
         timestamp_now = datetime.now().strftime("%d %B %Y, %H:%M HRS")
+
+        # Case-specific sections populated dynamically from the evidence bundle
+        evidence_sections_html = self._build_evidence_sections(evidence, issue_title)
 
         html_petition = f"""<!DOCTYPE html>
 <html>
@@ -178,7 +260,11 @@ class LegalPetitionGenerator:
     @media print {{
       .no-print-bar {{ display: none !important; }}
       body {{ margin: 15mm; font-size: 11pt; }}
-      .paritok-hero-card {{ background: #f8fafc !important; border: 1px solid #cbd5e1 !important; color: #000 !important; }}
+      .paritok-hero-card {{
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000 !important;
+      }}
     }}
   </style>
 </head>
@@ -198,7 +284,8 @@ class LegalPetitionGenerator:
     Assembled Raw Evidence Bundle: <strong>{metrics.original_tokens} tokens</strong> |
     Paritok Optimized Payload: <strong>{metrics.optimized_tokens} tokens</strong> |
     Token Reduction: <strong>{metrics.savings_percentage}% saved</strong> ({metrics.tokens_saved} tokens pruned)<br>
-    <em>Source: {metrics.optimizer_source} — Essential statutory provisions, contractor penalty clauses, and historical incident IDs verified and retained.</em>
+    <em>Source: {metrics.optimizer_source} - Essential statutory provisions, contractor
+    penalty clauses, and historical incident IDs verified and retained.</em>
   </div>
 
   <div class="recipient">
@@ -209,32 +296,22 @@ class LegalPetitionGenerator:
   </div>
 
   <div class="subject">
-    SUBJECT: DEMAND FOR IMMEDIATE RECTIFICATION OF HAZARDOUS {issue_title} AT GPS ({incident.latitude}, {incident.longitude}) & ENFORCEMENT OF CONTRACTOR SLA PENALTY
+    SUBJECT: DEMAND FOR IMMEDIATE RECTIFICATION OF HAZARDOUS {issue_title} AT GPS
+    ({incident.latitude}, {incident.longitude}) & ENFORCEMENT OF CONTRACTOR SLA PENALTY
   </div>
 
   <p>Respected Authority,</p>
 
   <p>
-    The undersigned Autonomous Civic Intelligence AI Filer (ACIRP Engine) hereby submits this formal petition on behalf of
+    The undersigned Autonomous Civic Intelligence AI Filer (ACIRP Engine) hereby submits
+    this formal petition on behalf of
     citizen <strong>{incident.complainant_name}</strong> regarding an unaddressed civic hazard located at coordinates
     GPS ({incident.latitude}, {incident.longitude}).
   </p>
 
-  <div class="section-header">I. CONSTITUTIONAL & STATUTORY MANDATES</div>
-  <p>
-    1. <strong>Article 21 of the Constitution of India:</strong> High Court Precedent (WP 42927/2015) establishes that the Right to Life includes the fundamental right to safe, hazard-free roads and clean public spaces.<br>
-    2. <strong>KMCA 1976 (Section 58 & 265 / Section 272 / Section 336):</strong> Imposes an obligatory duty on the Corporation to maintain streets, clear waste blackspots, and secure dangerous hazards.<br>
-    3. <strong>Karnataka Sakala Services Guarantee Act 2011:</strong> Mandatory statutory resolution deadline (24-48h). Section 12 authorizes automatic salary deduction penalties on defaulting Nodal Officers.
-  </p>
+  {evidence_sections_html}
 
-  <div class="section-header">II. DEPARTMENTAL SOPS & CONTRACTOR SLA PENALTY</div>
-  <p>
-    1. <strong>Departmental Repair SOP:</strong> Mandates strict compliance with IRC:82-2023 (Pothole compaction) / BBMP SWM Bylaws 2020 (Garbage blackspots) / Forest Wing Emergency Protocol 2023 (Fallen trees).<br>
-    2. <strong>Clause 14.2 (Defect Liability Period):</strong> Free-of-cost 12-month contractor reinstatement obligation.<br>
-    3. <strong>Clause 18.5 (Liquidated Damages Penalty):</strong> Mandatory penalty assessment of <strong>₹5,000 per calendar day</strong> against contractor billing following citizen notice.
-  </p>
-
-  <div class="section-header">III. PARITOK-OPTIMIZED ESSENTIAL EVIDENCE CONTEXT (~{metrics.optimized_tokens} TOKENS)</div>
+  <div class="section-header">VI. PARITOK-OPTIMIZED EVIDENCE CONTEXT (~{metrics.optimized_tokens} TOKENS)</div>
   <div class="evidence-box">{optimized_evidence}</div>
 
   <div class="prayer-box">
@@ -269,7 +346,8 @@ class LegalPetitionGenerator:
             "tokens_saved": metrics.tokens_saved,
             "savings_percentage": metrics.savings_percentage,
             "optimizer_source": metrics.optimizer_source,
-            "document_count": evidence["document_count"]
+            "document_count": evidence["document_count"],
+            "paritok_metrics": metrics
         }
 
 

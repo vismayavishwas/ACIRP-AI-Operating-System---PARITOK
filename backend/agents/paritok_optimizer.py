@@ -157,86 +157,88 @@ class ParitokContextOptimizer:
         pruned_chunks: List[PrunedChunk] = []
 
         if self.api_key and self.api_key != "dummy_key_for_offline_mock" and PARITOK_SDK_AVAILABLE:
-            try:
-                gpu_cfg = GpuServerConfig(api_key=self.api_key, base_url="https://www.paritok.com/api")
-                comp_cfg = CompressionConfig(min_tokens=20)
-                cfg = ParitokConfig(use_gpu_server=True, gpu_server=gpu_cfg, compression=comp_cfg)
-                engine = ParitokEngine(config=cfg)
+            if GpuServerConfig and CompressionConfig and ParitokConfig and ParitokEngine:
+                try:
+                    gpu_cfg = GpuServerConfig(api_key=self.api_key, base_url="https://www.paritok.com/api")
+                    comp_cfg = CompressionConfig(min_tokens=20)
+                    cfg = ParitokConfig(use_gpu_server=True, gpu_server=gpu_cfg, compression=comp_cfg)
+                    engine = ParitokEngine(config=cfg)
 
-                # Format request messages for ParitokEngine
-                req_msgs = []
-                if system_rules:
-                    req_msgs.append({"role": "system", "content": system_rules})
-                if retrieved_docs:
-                    doc_texts = []
-                    for idx, doc in enumerate(retrieved_docs):
-                        doc_texts.append(f"Document #{idx + 1}: {doc}")
-                    req_msgs.append({
-                        "role": "user",
-                        "content": "--- RETRIEVED INCIDENT KNOWLEDGE & RAG DOCUMENTS ---\n" + "\n\n".join(doc_texts)
-                    })
-                if conversation_history:
-                    for h in conversation_history:
-                        req_msgs.append({"role": h.get("role", "user"), "content": h.get("content", "")})
-                req_msgs.append({"role": "user", "content": f"--- CITIZEN TASK INPUT ---\n{raw_prompt}"})
+                    # Format request messages for ParitokEngine
+                    req_msgs = []
+                    if system_rules:
+                        req_msgs.append({"role": "system", "content": system_rules})
+                    if retrieved_docs:
+                        doc_texts = []
+                        for idx, doc in enumerate(retrieved_docs):
+                            doc_texts.append(f"Document #{idx + 1}: {doc}")
+                        req_msgs.append({
+                            "role": "user",
+                            "content": "--- RETRIEVED INCIDENT KNOWLEDGE & RAG DOCUMENTS ---\n" + "\n\n".join(doc_texts)
+                        })
+                    if conversation_history:
+                        for h in conversation_history:
+                            req_msgs.append({"role": h.get("role", "user"), "content": h.get("content", "")})
+                    req_msgs.append({"role": "user", "content": f"--- CITIZEN TASK INPUT ---\n{raw_prompt}"})
 
-                logger.info(f"Paritok API call initiated. Input token count: {original_tokens}")
+                    logger.info(f"Paritok API call initiated. Input token count: {original_tokens}")
 
-                # ---- Diagnostics: confirm the full evidence bundle reaches Paritok ----
-                sdk_input_parts = [
-                    m.get("content", "") for m in req_msgs if isinstance(m, dict) and m.get("content")
-                ]
-                sdk_input_text = "\n\n".join(sdk_input_parts)
-                logger.info(
-                    "PARITOK_SDK_INPUT: chars=%d est_tokens=%d first300=%r last300=%r",
-                    len(sdk_input_text), estimate_tokens(sdk_input_text),
-                    sdk_input_text[:300], sdk_input_text[-300:]
-                )
-                print(
-                    "==== PARITOK SDK INPUT DIAGNOSTICS ====\n"
-                    f"chars={len(sdk_input_text)} est_tokens={estimate_tokens(sdk_input_text)}\n"
-                    f"FIRST 300: {sdk_input_text[:300]!r}\n"
-                    f"LAST 300: {sdk_input_text[-300:]!r}\n"
-                    "========================================"
-                )
+                    # ---- Diagnostics: confirm the full evidence bundle reaches Paritok ----
+                    sdk_input_parts = [
+                        m.get("content", "") for m in req_msgs if isinstance(m, dict) and m.get("content")
+                    ]
+                    sdk_input_text = "\n\n".join(sdk_input_parts)
+                    logger.info(
+                        "PARITOK_SDK_INPUT: chars=%d est_tokens=%d first300=%r last300=%r",
+                        len(sdk_input_text), estimate_tokens(sdk_input_text),
+                        sdk_input_text[:300], sdk_input_text[-300:]
+                    )
+                    print(
+                        "==== PARITOK SDK INPUT DIAGNOSTICS ====\n"
+                        f"chars={len(sdk_input_text)} est_tokens={estimate_tokens(sdk_input_text)}\n"
+                        f"FIRST 300: {sdk_input_text[:300]!r}\n"
+                        f"LAST 300: {sdk_input_text[-300:]!r}\n"
+                        "========================================"
+                    )
 
-                # Execute ParitokEngine processing
-                opt_msgs, _, stats, _ = engine.process_request(req_msgs)
+                    # Execute ParitokEngine processing
+                    opt_msgs, _, stats, _ = engine.process_request(req_msgs)
 
-                # Use the ACTUAL optimized output returned by Paritok. opt_msgs is the
-                # compressed message list: if the engine compressed nothing it equals the
-                # original messages (honest passthrough => 0% savings, reported as-is).
-                paritok_sdk_success = True
-                optimizer_source = "PARITOK_HOSTED_API"
+                    # Use the ACTUAL optimized output returned by Paritok. opt_msgs is the
+                    # compressed message list: if the engine compressed nothing it equals the
+                    # original messages (honest passthrough => 0% savings, reported as-is).
+                    paritok_sdk_success = True
+                    optimizer_source = "PARITOK_HOSTED_API"
 
-                compressed_parts = []
-                for m in opt_msgs or []:
-                    if isinstance(m, dict) and m.get("content"):
-                        compressed_parts.append(f"[{m.get('role', 'user')}]: {m.get('content')}")
-                    elif isinstance(m, str) and m:
-                        compressed_parts.append(m)
-                optimized_prompt = "\n\n".join(compressed_parts) if compressed_parts else full_original_prompt
+                    compressed_parts = []
+                    for m in opt_msgs or []:
+                        if isinstance(m, dict) and m.get("content"):
+                            compressed_parts.append(f"[{m.get('role', 'user')}]: {m.get('content')}")
+                        elif isinstance(m, str) and m:
+                            compressed_parts.append(m)
+                    optimized_prompt = "\n\n".join(compressed_parts) if compressed_parts else full_original_prompt
 
-                # SDK metrics are the single source of truth when the SDK provides them.
-                if stats.original_tokens > 0:
-                    sdk_orig_tokens = stats.original_tokens
-                    sdk_opt_tokens = stats.compressed_tokens
-                    if sdk_opt_tokens < sdk_orig_tokens:
-                        pruned_chunks.append(PrunedChunk(
-                            content="Context neural-compressed via Paritok hosted GPU server (paritok-4b-v1 model).",
-                            reason="Paritok Neural Compression",
-                            tokens_saved=max(0, sdk_orig_tokens - sdk_opt_tokens)
-                        ))
-                else:
-                    # SDK did not provide token counts (e.g. passthrough => no compression).
-                    # Estimate honestly from the actual prompt text used downstream.
-                    sdk_orig_tokens = original_tokens
-                    sdk_opt_tokens = estimate_tokens(optimized_prompt)
-            except Exception as e:
-                logger.error(f"Paritok Engine initialization issue ({type(e).__name__}: {e})", exc_info=True)
-                print(f"========== PARITOK ENGINE EXCEPTION: {type(e).__name__}: {e} ==========")
+                    # SDK metrics are the single source of truth when the SDK provides them.
+                    if stats.original_tokens > 0:
+                        sdk_orig_tokens = stats.original_tokens
+                        sdk_opt_tokens = stats.compressed_tokens
+                        if sdk_opt_tokens < sdk_orig_tokens:
+                            pruned_chunks.append(PrunedChunk(
+                                content="Context neural-compressed via Paritok hosted GPU server (paritok-4b-v1 model).",
+                                reason="Paritok Neural Compression",
+                                tokens_saved=max(0, sdk_orig_tokens - sdk_opt_tokens)
+                            ))
+                    else:
+                        # SDK did not provide token counts (e.g. passthrough => no compression).
+                        # Estimate honestly from the actual prompt text used downstream.
+                        sdk_orig_tokens = original_tokens
+                        sdk_opt_tokens = estimate_tokens(optimized_prompt)
+                except Exception as e:
+                    logger.error(f"Paritok Engine initialization issue ({type(e).__name__}: {e})", exc_info=True)
+                    print(f"========== PARITOK ENGINE EXCEPTION: {type(e).__name__}: {e} ==========")
 
         if not paritok_sdk_success:
+
             # Local Context Pruning Fallback
             optimizer_source = "LOCAL_FALLBACK_OPTIMIZER"
 

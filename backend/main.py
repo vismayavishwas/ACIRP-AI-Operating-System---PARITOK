@@ -79,8 +79,8 @@ async def create_incident(
     """
     incident_id = f"inc_{uuid.uuid4().hex[:8]}"
 
-    # Save the uploaded file
-    file_ext = image.filename.split(".")[-1]
+    safe_filename = image.filename or "image.jpg"
+    file_ext = safe_filename.split(".")[-1]
     image_bytes = await image.read()
 
     # Try to upload to Firebase Storage
@@ -114,9 +114,10 @@ async def create_incident(
     incident = await perception_agent.analyze(
         image_bytes, incident,
         mime_type=image.content_type or "image/jpeg",
-        filename=image.filename)
+        filename=safe_filename)
 
     # Run the Planning Agent strategy determination & Paritok RAG optimization
+
     if incident.status == "PLANNED":
         incident = await planner_agent.execute_step(incident)
 
@@ -164,7 +165,8 @@ async def verify_incident_resolution(
         raise HTTPException(status_code=400, detail="Incident is not in verification phase")
 
     # Save resolution file
-    file_ext = image.filename.split(".")[-1]
+    safe_filename = image.filename or "image.jpg"
+    file_ext = safe_filename.split(".")[-1]
     image_after_bytes = await image.read()
 
     # Try to upload to Firebase Storage
@@ -208,8 +210,9 @@ async def verify_incident_resolution(
     incident = await verification_agent.verify(
         image_before_bytes, image_after_bytes, incident,
         before_mime=before_mime, after_mime=after_mime,
-        filename=image.filename
+        filename=safe_filename
     )
+
     db.save_incident(incident)
     return incident
 
@@ -310,7 +313,8 @@ async def re_upload_image(incident_id: str, image: UploadFile = File(...)):
     incident = await perception_agent.analyze(
         image_bytes, incident,
         mime_type=image.content_type or "image/jpeg",
-        filename=image.filename)
+        filename=image.filename or "image.jpg")
+
     db.save_incident(incident)
     return incident
 

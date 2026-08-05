@@ -42,6 +42,7 @@ Every agent action involves context retrieval (nearby resolved cases, citizen in
 2. **Timeline Log Deduplication:** Merges identical status polling events and repeated agent state logs.
 3. **Spatial RAG Filtering:** Discards historical incident records with low relevance scores (`<0.30`) or old dates (>30 days).
 4. **Metadata Trimming:** Removes redundant GPS header wrappers and formatting noise.
+5. there is a knowledge layer in ACIRP which contains legal documents and context based on government policies, it is unique to the type of case solved. Paritok did not compress any prompts until the knowledge layer was added because prompts were too small, but now it compresses around 0.6% of the tokens.
 
 ### 3. Calculating Metrics & Cost Savings from Real Data
 All token counts, savings percentages, and financial metrics in ACIRP are calculated from **actual request payloads** rather than dummy benchmarks:
@@ -158,3 +159,4 @@ pytest tests -v --cov=.
 
 * **GitHub Repository:** [https://github.com/vismayavishwas/ACIRP-AI-Operating-System---PARITOK.git](https://github.com/vismayavishwas/ACIRP-AI-Operating-System---PARITOK.git)
 * **License:** Distributed under the **Apache License Version 2.0**.
+* Built with Paritok https://github.com/Paritok-official/paritok-4b-v1

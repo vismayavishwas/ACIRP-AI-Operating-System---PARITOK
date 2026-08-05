@@ -56,7 +56,15 @@ All token counts, savings percentages, and financial metrics in ACIRP are calcul
 If the remote Paritok API is unreachable or times out, the backend gracefully switches to a local context optimizer and explicitly tags the output:
 * **Paritok API Active:** UI displays **`Optimization Status: Paritok API Optimized`** (`optimizer_source: "PARITOK_HOSTED_API"`).
 * **Paritok API Unavailable:** UI displays **`Paritok API unavailable — using fallback local context optimizer`** (`optimizer_source: "FALLBACK_LOCAL"`).
-
+Image
+   ↓
+Gemini Vision
+   ↓
+Knowledge Retrieval
+   ↓
+Paritok Optimization
+   ↓
+Petition Generator
 ---
 
 ## 🌟 Key Features

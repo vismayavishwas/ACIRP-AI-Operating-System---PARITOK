@@ -448,6 +448,8 @@ class CivicEvidenceRetrievalAgent:
                 + len(knowledge["historical_precedents"])
                 + len(self.escalation_matrix)
             )
+
+
         }
 
 

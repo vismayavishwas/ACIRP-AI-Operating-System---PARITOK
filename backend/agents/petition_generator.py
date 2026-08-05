@@ -37,10 +37,9 @@ class LegalPetitionGenerator:
                 f"{idx + 1}. <strong>{_esc(item.get('title', ''))}:</strong> {_esc(item.get('content', ''))}"
             )
         if const_items:
+            const_body = '<br>\n    '.join(const_items)
             html_parts.append(
-                '<div class="section-header">I. CONSTITUTIONAL & STATUTORY MANDATES</div>\n  <p>\n    '
-                + '<br>\n    '.join(const_items)
-                + "\n  </p>"
+                f'<div class="section-header">I. CONSTITUTIONAL & STATUTORY MANDATES</div>\n  <p>\n    {const_body}\n  </p>'
             )
 
         # Section II: Case-type specific statutory legislation
@@ -51,10 +50,9 @@ class LegalPetitionGenerator:
             )
         if stat_items:
             header = f"II. STATUTORY LEGISLATION APPLICABLE TO {_esc(issue_title)}"
+            stat_body = '<br>\n    '.join(stat_items)
             html_parts.append(
-                f'<div class="section-header">{header}</div>\n  <p>\n    '
-                + '<br>\n    '.join(stat_items)
-                + "\n  </p>"
+                f'<div class="section-header">{header}</div>\n  <p>\n    {stat_body}\n  </p>'
             )
 
         # Section III: Departmental SOPs
@@ -62,10 +60,9 @@ class LegalPetitionGenerator:
         for idx, sop in enumerate(evidence.get("departmental_sops", [])):
             sop_items.append(f"{idx + 1}. {_esc(sop)}")
         if sop_items:
+            sop_body = '<br>\n    '.join(sop_items)
             html_parts.append(
-                '<div class="section-header">III. DEPARTMENTAL SOPS & REPAIR STANDARDS</div>\n  <p>\n    '
-                + '<br>\n    '.join(sop_items)
-                + "\n  </p>"
+                f'<div class="section-header">III. DEPARTMENTAL SOPS & REPAIR STANDARDS</div>\n  <p>\n    {sop_body}\n  </p>'
             )
 
         # Section IV: Contractor SLA & liquidated damages clauses
@@ -73,10 +70,9 @@ class LegalPetitionGenerator:
         for idx, clause in enumerate(evidence.get("contractor_sla_clauses", [])):
             contractor_items.append(f"{idx + 1}. {_esc(clause)}")
         if contractor_items:
+            contractor_body = '<br>\n    '.join(contractor_items)
             html_parts.append(
-                '<div class="section-header">IV. CONTRACTOR SLA & LIQUIDATED DAMAGES CLAUSES</div>\n  <p>\n    '
-                + '<br>\n    '.join(contractor_items)
-                + "\n  </p>"
+                f'<div class="section-header">IV. CONTRACTOR SLA & LIQUIDATED DAMAGES CLAUSES</div>\n  <p>\n    {contractor_body}\n  </p>'
             )
 
         # Section V: Historical ward precedents
@@ -87,15 +83,15 @@ class LegalPetitionGenerator:
                 f"{_esc(prec.get('details', ''))} <em>Outcome: {_esc(prec.get('outcome', ''))}</em>"
             )
         if precedent_items:
+            precedent_body = '<br>\n    '.join(precedent_items)
             html_parts.append(
-                '<div class="section-header">V. HISTORICAL WARD PRECEDENTS</div>\n  <p>\n    '
-                + '<br>\n    '.join(precedent_items)
-                + "\n  </p>"
+                f'<div class="section-header">V. HISTORICAL WARD PRECEDENTS</div>\n  <p>\n    {precedent_body}\n  </p>'
             )
 
         return "\n\n  ".join(html_parts) if html_parts else ""
 
     async def generate_petition(
+
         self,
         incident: Incident,
         escalation_target: str = "Municipal Commissioner & Zonal Officer"
